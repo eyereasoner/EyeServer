@@ -1,0 +1,3 @@
+@prefix : <http://example.org/animals#>.
+:Felix a :Cat.
+:Pluto a :Dog.
