@@ -3,7 +3,7 @@
 var spawn = require('child_process').spawn;
 
 var commentRegex = /^#.*$\n/mg,
-    errorRegex = /^\*\* ERROR \*\*.*$/m;
+    errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
     
 var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
                     'noQnames', 'quiet', 'quickFalse', 'quickPossible',
@@ -12,13 +12,22 @@ var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
                     'pass', 'passAll'];
 
 // An Eye object provides reasoning methods.
-function Eye () {
+function Eye (options) {
+  options = options || {};
+  
+  function F() {};
+  F.prototype = Eye.prototype;
+  
+  var eye = new F();
+  eye.spawn = options.spawn;
+  return eye;
 }
 
 var eyePrototype = Eye.prototype = {
+  constructor: Eye,
+  
   defaults: {
     nope: true,
-    pass: false,
     data: []
   },
   
@@ -26,32 +35,44 @@ var eyePrototype = Eye.prototype = {
     return this.execute({ data: data, pass: true }, onOutput, onError);
   },
   
-  execute: function (params, onOutput, onError) {
-    // add default parameters if applicable
-    params = params || {};
+  execute: function (options, onOutput, onError) {
+    // set correct argument values (options is optional)
+    if (typeof(options) === 'function') {
+      onError = onOutput;
+      onOutput = options;
+      options = {};
+    }
+    
+    // add default options if applicable
+    options = options || {};
     for(var prop in this.defaults) {
-      if (this.defaults.hasOwnProperty(prop) && typeof(params[prop]) === 'undefined') {
-        params[prop] = this.defaults[prop];
+      if (this.defaults.hasOwnProperty(prop) && typeof(options[prop]) === 'undefined') {
+        options[prop] = this.defaults[prop];
       }
     }
     
-    // set EYE commandline options according to parameters
-    var options = [];
+    // set EYE commandline arguments according to options
+    var args = [];
     noArgOptions.forEach(function (name) {
-      if (params[name]) {
-        options.push('--' + name.replace(/([A-Z])/g, '-$1').toLowerCase());
+      if (options[name]) {
+        args.push('--' + name.replace(/([A-Z])/g, '-$1').toLowerCase());
       }
     });
     
     // add data URIs
-    params.data.forEach(function (url) {
-      if (url.match(/^http:\/\/[^(?:localhost)(?:127\.)]/)) {
-        options.push(url);
+    if(typeof(options.data) === "string")
+      options.data = [options.data];
+
+    options.data.forEach(function (url) {
+      if(url.match(/^https?:\/\//)) {
+        if(url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1|[0:]*:1)/))
+          return;
+        args.push(url);
       }
     });
     
     // start EYE
-    var eye = spawn('eye', options),
+    var eye = (this.spawn || spawn)('eye', args),
         output = "",
         error = "";
     
@@ -66,15 +87,18 @@ var eyePrototype = Eye.prototype = {
     });
     
     // handle exit event by reporting output or error
-    eye.on('exit', function (code) {
+    eye.once('exit', function (code) {
+      eye.stdout.removeAllListeners('data');
+      eye.stderr.removeAllListeners('data');
+      
       var errorMatch = error.match(errorRegex);
       if (!errorMatch) {
         output = output.replace(commentRegex, '');
         output = output.trim();
-        onOutput(output);
+        onOutput && onOutput(output);
       }
       else {
-        onError(errorMatch);
+        onError && onError(errorMatch[1]);
       }
     });
   }
