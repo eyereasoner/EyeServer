@@ -11,7 +11,11 @@ var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
                     'pcl', 'strings', 'debug', 'profile', 'version', 'help',
                     'pass', 'passAll'];
 
-var eye = module.exports = {
+// An Eye object provides reasoning methods.
+function Eye () {
+}
+
+var eyePrototype = Eye.prototype = {
   defaults: {
     nope: true,
     pass: false,
@@ -75,3 +79,17 @@ var eye = module.exports = {
     });
   }
 };
+
+// Expose each of the Eye instance functions also as static functions.
+// They behave as instance functions on a new Eye object.
+for(var propertyName in eyePrototype) {
+  if (eyePrototype.hasOwnProperty(propertyName) && typeof(eyePrototype[propertyName]) === 'function') {
+    (function(propertyName) {
+      Eye[propertyName] = function () {
+        return eyePrototype[propertyName].apply(new Eye(), arguments);
+      }
+    })(propertyName);
+  }
+}
+
+module.exports = Eye;
