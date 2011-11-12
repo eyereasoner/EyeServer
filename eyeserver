@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+var EyeServer = require('./eyeserver.js');
+
+var eyeServer = new EyeServer();
+var port = process.argv[2] ? parseInt(process.argv[2], 10) : 8000;
+eyeServer.listen(port);
+console.log('EYE server running on http://localhost:' + port);

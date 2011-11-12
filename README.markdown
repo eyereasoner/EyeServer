@@ -1,7 +1,7 @@
 # EYE reasoner server for node.js
 # Running
 
-    ./eyeserver.js
+    ./eyeserver
 
 # Usage example
 
