@@ -29,15 +29,14 @@ var eyePrototype = Eye.prototype = {
     data: []
   },
   
-  pass: function (data, onOutput, onError) {
-    return this.execute({ data: data, pass: true }, onOutput, onError);
+  pass: function (data, callback) {
+    return this.execute({ data: data, pass: true }, callback);
   },
   
-  execute: function (options, onOutput, onError) {
+  execute: function (options, callback) {
     // set correct argument values (options is optional)
     if (typeof(options) === 'function') {
-      onError = onOutput;
-      onOutput = options;
+      callback = options;
       options = {};
     }
     
@@ -93,10 +92,10 @@ var eyePrototype = Eye.prototype = {
       if (!errorMatch) {
         output = output.replace(commentRegex, '');
         output = output.trim();
-        onOutput && onOutput(output);
+        callback && callback(null, output);
       }
       else {
-        onError && onError(errorMatch[1]);
+       callback(errorMatch[1], null);
       }
     });
   }

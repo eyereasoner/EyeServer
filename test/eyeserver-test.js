@@ -48,15 +48,15 @@ vows.describe('EyeServer').addBatch({
 }).export(module);
 
 var eyeDummy = {
-  execute: function (options, onOutput, onError) {
+  execute: function (options, callback) {
     var path = options.originalUrl;
     delete options.originalUrl;
     this.options[path] = options;
     
     if(this.shouldSucceed[path])
-      onOutput('output');
+      callback(null, 'output');
     else
-      onError('error');
+      callback('error', null);
   },
   options: {},
   shouldSucceed: {}

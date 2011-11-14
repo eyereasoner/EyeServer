@@ -37,16 +37,16 @@ function EyeServer(options) {
       settings.originalUrl = req.originalUrl;
 
     // execute the reasoner and return result or error
-    (options.eye || eye).execute(settings,
-      function (result) {
+    (options.eye || eye).execute(settings, function (error, result) {
+      if(!error) {
         res.header('Content-Type', 'text/n3');
         res.send(result + '\n');
-      },
-      function (error) {
+      }
+      else {
         res.header('Content-Type', 'text/plain');
         res.send(error + '\n', 400);
       }
-    );
+    });
   });
   
   return eyeServer;
