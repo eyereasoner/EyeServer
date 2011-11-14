@@ -75,6 +75,7 @@ vows.describe('Eye').addBatch({
       shouldExecuteEyeWith({ data: ['http://ex.org/doesnotexist'] },
                            "with the URI",
                            ['--nope', 'http://ex.org/doesnotexist'],
+                           null, null,
                            "** ERROR ** Message",
                            "Message"),
     
@@ -86,7 +87,9 @@ vows.describe('Eye').addBatch({
                              args[1].should.match(/^\/tmp\//$);
                              fs.readFileSync(args[1], 'utf8').should.eql(':a :b :c.');
                              args.should.eql(['--nope', args[1]]);
-                           }),
+                           },
+                           '</tmp/node_12345_0/0.tmp#a> </tmp/node_12345_0/0.tmp#b> </tmp/node_12345_0/0.tmp#c>.',
+                           ':a :b :c.'),
   }
 }).export(module);
 
@@ -108,9 +111,9 @@ function executeEyeWith(options, errorText, outputText) {
   };
 }
 
-function shouldExecuteEyeWith(options, description, expectedArgs, error, errorMessage) {
+function shouldExecuteEyeWith(options, description, expectedArgs, output, expectedOutput, error, errorMessage) {
   var context = {
-    topic: executeEyeWith(options, error, error ? null : "output")
+    topic: executeEyeWith(options, error, error ? null : (output || "output"))
   };
 
   context['should execute eye ' + description] = function (err, result, spawner) {
@@ -124,7 +127,7 @@ function shouldExecuteEyeWith(options, description, expectedArgs, error, errorMe
   if(!error)
     context['should return the eye output'] = function (err, result) {
       should.not.exist(err);
-      result.should.equal("output");
+      result.should.equal(expectedOutput || "output");
     };
   else
     context['should return the eye error'] = function (err, result) {

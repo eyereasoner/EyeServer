@@ -2,6 +2,7 @@ var spawn = require('child_process').spawn,
     ResourceCache = require('./resourcecache');
 
 var commentRegex = /^#.*$\n/mg,
+    localVariableRegex = /<\/tmp\/[^#]+#([^>]+)>/g,
     errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
     
 var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
@@ -113,6 +114,7 @@ var eyePrototype = Eye.prototype = {
         var errorMatch = error.match(errorRegex);
         if (!errorMatch) {
           output = output.replace(commentRegex, '');
+          output = output.replace(localVariableRegex, ':$1');
           output = output.trim();
           callback && callback(null, output);
         }
