@@ -52,6 +52,4 @@ function EyeServer(options) {
   return eyeServer;
 }
 
-EyeServer.prototype = express.createServer();
-
 module.exports = EyeServer;

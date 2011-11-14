@@ -10,6 +10,7 @@ function ResourceCache() {
   F.prototype = ResourceCache.prototype;
   var resourceCache = new F();
   
+  process.setMaxListeners(100);
   process.once('exit', function () {
     resourceCache.destroy();
   });
@@ -44,26 +45,25 @@ ResourceCache.prototype = {
     // indicate getDirectoryName is pending by setting the callback
     this.dirName = callback;
     
-    // find a non-existing path
-    function findDirectoryName (prefix, counter) {
-      path.exists(prefix + counter, function(exists) {
-        if(exists)
-          findDirectoryName(prefix, counter + 1);
-        else
-          createDirectory(prefix + counter + '/');
-      });
-    }
-    findDirectoryName('/tmp/node_' + process.pid + '_', 0);
-    
     // create the directory and notify callbacks
-    function createDirectory (name) {
-      fs.mkdir(name, 0755, function(err) {
+    function createDirectory (prefix, counter) {
+      var dirName = prefix + counter + '/'; 
+      fs.mkdir(dirName, 0755, function(err) {
         // thiz.dirname might contain chained callbacks by now
         callback = thiz.dirName;
-        thiz.dirName = name;
-        callback(err, name);
+        if(!err) {
+          thiz.dirName = dirName;
+          callback(null, dirName);
+        }
+        else {
+          if(err.code === 'EEXIST')
+            createDirectory(prefix, counter + 1);
+          else
+            callback(err, null);
+        }
       });
     }
+    createDirectory('/tmp/node_' + process.pid + '_', 0);
   },
   
   cacheFromString: function(data, callback) {

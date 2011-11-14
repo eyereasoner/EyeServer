@@ -1,4 +1,5 @@
-var spawn = require('child_process').spawn;
+var spawn = require('child_process').spawn,
+    ResourceCache = require('./resourcecache');
 
 var commentRegex = /^#.*$\n/mg,
     errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
@@ -18,6 +19,7 @@ function Eye (options) {
   
   var eye = new F();
   eye.spawn = options.spawn;
+  eye.resourceCache = new ResourceCache();
   return eye;
 }
 
@@ -34,6 +36,8 @@ var eyePrototype = Eye.prototype = {
   },
   
   execute: function (options, callback) {
+    var thiz = this;
+    
     // set correct argument values (options is optional)
     if (typeof(options) === 'function') {
       callback = options;
@@ -49,7 +53,8 @@ var eyePrototype = Eye.prototype = {
     }
     
     // set EYE commandline arguments according to options
-    var args = [];
+    var args = [],
+        resourcesPending = 0;
     noArgOptions.forEach(function (name) {
       if (options[name]) {
         args.push('--' + name.replace(/([A-Z])/g, '-$1').toLowerCase());
@@ -60,46 +65,64 @@ var eyePrototype = Eye.prototype = {
     if(typeof(options.data) === "string")
       options.data = [options.data];
 
-    options.data.forEach(function (url) {
-      if(url.match(/^https?:\/\//)) {
-        if(url.match(/^https?:\/\/(?:localhost|127\.0\.0\.1|[0:]*:1)/))
-          return;
-        args.push(url);
-      }
-    });
-    
-    // start EYE
-    var eye = (this.spawn || spawn)('eye', args),
-        output = "",
-        error = "";
-    
-    // capture stdout
-    eye.stdout.on('data', function (data) {
-      output += data;
-    });
-    
-    // capture stderr
-    eye.stderr.on('data', function (data) {
-      error += data;
-    });
-    
-    // handle exit event by reporting output or error
-    eye.once('exit', function (code) {
-      eye.stdout.removeAllListeners('data');
-      eye.stderr.removeAllListeners('data');
-      
-      var errorMatch = error.match(errorRegex);
-      if (!errorMatch) {
-        output = output.replace(commentRegex, '');
-        output = output.trim();
-        callback && callback(null, output);
+    options.data.forEach(function (dataItem) {
+      // does it contain a protocol name of some sort?
+      if(dataItem.match(/^\w+:/)) {
+        // is it HTTP(S), but not on a reserved domain?
+        if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/))
+          args.push(dataItem);
       }
       else {
-       callback(errorMatch[1], null);
+        resourcesPending++;
+        thiz.resourceCache.cacheFromString(dataItem, function (err, fileName) {
+          if(err)
+            return callback(err, null);
+
+          args.push(fileName);
+          resourcesPending--;
+          if(!resourcesPending)
+            startEye();
+        });
       }
     });
+    
+    if(!resourcesPending)
+      startEye();
+    
+    function startEye() {
+      // start EYE
+      var eye = (thiz.spawn || spawn)('eye', args),
+          output = "",
+          error = "";
+    
+      // capture stdout
+      eye.stdout.on('data', function (data) {
+        output += data;
+      });
+      
+      // capture stderr
+      eye.stderr.on('data', function (data) {
+        error += data;
+      });
+    
+      // handle exit event by reporting output or error
+      eye.once('exit', function (code) {
+        eye.stdout.removeAllListeners('data');
+        eye.stderr.removeAllListeners('data');
+      
+        var errorMatch = error.match(errorRegex);
+        if (!errorMatch) {
+          output = output.replace(commentRegex, '');
+          output = output.trim();
+          callback && callback(null, output);
+        }
+        else {
+         callback(errorMatch[1], null);
+        }
+      });
+    }
   }
-};
+}
 
 // Expose each of the Eye instance functions also as static functions.
 // They behave as instance functions on a new Eye object.

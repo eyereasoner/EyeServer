@@ -1,5 +1,6 @@
 var vows = require('vows'),
     should = require('should'),
+    fs = require('fs'),
     SpawnAsserter = require('./spawn-asserter');
 var eye = require('../eye.js');
 
@@ -66,7 +67,7 @@ vows.describe('Eye').addBatch({
                            ['--nope', 'http://ex.org/1']),
     
     'when executed with file URIs':
-       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'file://whatever/', 'file:///whatever/'] },
+       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'file://example/'] },
                             "without the file URIs",
                             ['--nope', 'http://ex.org/1']),
     
@@ -76,6 +77,16 @@ vows.describe('Eye').addBatch({
                            ['--nope', 'http://ex.org/doesnotexist'],
                            "** ERROR ** Message",
                            "Message"),
+    
+    'when executed with literal data':
+      shouldExecuteEyeWith({ data: ':a :b :c.' },
+                           'with a temporary file',
+                           function (args) {
+                             args.length.should.eql(2);
+                             args[1].should.match(/^\/tmp\//$);
+                             fs.readFileSync(args[1], 'utf8').should.eql(':a :b :c.');
+                             args.should.eql(['--nope', args[1]]);
+                           }),
   }
 }).export(module);
 
@@ -104,7 +115,10 @@ function shouldExecuteEyeWith(options, description, expectedArgs, error, errorMe
 
   context['should execute eye ' + description] = function (err, result, spawner) {
     spawner.command.should.eql('eye');
-    spawner.args.should.eql(expectedArgs);
+    if(typeof(expectedArgs) !== 'function')
+      spawner.args.should.eql(expectedArgs);
+    else
+      expectedArgs(spawner.args);
   }
   
   if(!error)

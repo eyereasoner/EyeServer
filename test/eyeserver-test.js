@@ -43,7 +43,10 @@ vows.describe('EyeServer').addBatch({
       respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', 'http://ex.org/2'], pass: true }),
     
     'receiving a request to /?data=http%3A%2F%2Fex.org%2F1&data=http%3A%2F%2Fex.org%2F2,http%3A%2F%2Fex.org%2F3':
-      respondsWith(200, 'text/n3', 'with three URIs', { data: ['http://ex.org/1', 'http://ex.org/2', 'http://ex.org/3'], pass: true })
+      respondsWith(200, 'text/n3', 'with three URIs', { data: ['http://ex.org/1', 'http://ex.org/2', 'http://ex.org/3'], pass: true }),
+    
+    'receiving a request to /?data=%3Aa%20%3Ab%20%3Ac.':
+      respondsWith(200, 'text/n3', 'with N3 data', { data: [':a :b :c.'], pass: true }),
   }
 }).export(module);
 
