@@ -90,7 +90,7 @@ vows.describe('ResourceCache').addBatch({
     
     'when caching an existing resource through HTTP': {
       topic: function(resourceCache) {
-        return resourceCache.cacheFromUrl('http://127.0.0.1:8005/', this.callback);
+        return resourceCache.cacheFromUrl('http://127.0.0.1:14207/', this.callback);
       },
       
       'should use a temporary file': function(err, result) {
@@ -106,11 +106,11 @@ vows.describe('ResourceCache').addBatch({
     
     'when caching a non-existing resource through HTTP': {
       topic: function(resourceCache) {
-        return resourceCache.cacheFromUrl('http://127.0.0.1:8005/notexists', this.callback);
+        return resourceCache.cacheFromUrl('http://127.0.0.1:14207/notexists', this.callback);
       },
       
       'should result in an error': function(err, result) {
-        err.should.eql('GET request to http://127.0.0.1:8005/notexists failed with status 404');
+        err.should.eql('GET request to http://127.0.0.1:14207/notexists failed with status 404');
         should.not.exist(result);
       }
     }
@@ -119,4 +119,4 @@ vows.describe('ResourceCache').addBatch({
 
 dummyServer = express.createServer();
 dummyServer.get(/^\/$/, function (req, res, next) { res.send('contents', 200); });
-dummyServer.listen(8005);
+dummyServer.listen(14207);

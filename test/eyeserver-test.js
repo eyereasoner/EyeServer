@@ -23,7 +23,7 @@ vows.describe('EyeServer').addBatch({
   'An EyeServer instance': {
     topic: function() {
       server = new eyeserver({ eye: eyeDummy, debug: true });
-      server.listen(3000);
+      server.listen(13705);
       return server;
     },
     
@@ -104,7 +104,7 @@ function respondsWith(status, contentType, description, executeArguments, method
       path = urlMatch[1];
       form = urlMatch[2];
       eyeDummy.shouldSucceed[path] = shouldSucceed;
-      request({ url: 'http://localhost:3000' + path,
+      request({ url: 'http://localhost:13705' + path,
                 body: form,
                 headers: { 'content-type': 'application/x-www-form-urlencoded' },
                 method: method }, this.callback);
