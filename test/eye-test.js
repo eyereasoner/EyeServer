@@ -111,7 +111,7 @@ vows.describe('Eye').addBatch({
 function executeEyeWith(options, errorText, outputText) {
   return function () {
     var spawner = new SpawnAsserter(),
-        eyeInstance = new eye({spawn: spawner.spawn }),
+        eyeInstance = new eye({ spawn: spawner.spawn, keepResources: true }),
         callback = this.callback;
     
     spawner.once('ready', function() {

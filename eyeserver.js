@@ -1,5 +1,5 @@
 var express = require('express'),
-    eye = require('./eye');
+    Eye = require('./eye');
 
 function EyeServer(options) {
   options = options || {};
@@ -7,6 +7,8 @@ function EyeServer(options) {
   eyeServer = express.createServer();
   eyeServer.constructor = EyeServer;
   eyeServer.prototype = EyeServer.prototype;
+  
+  var eye = new Eye();
   
   eyeServer.get(/^\/$/, function (req, res, next) {
     var reqParams = req.query,

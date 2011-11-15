@@ -72,6 +72,22 @@ vows.describe('ResourceCache').addBatch({
       }
     },
     
+    'when releasing a resource from cache': {
+      topic: function(resourceCache) {
+        var thiz = this;
+        return resourceCache.cacheFromString('contents', function(err, name) {
+          resourceCache.release(name, function(err) {
+            thiz.callback(err, name);
+          });
+        });
+      },
+      
+      'should remove the temporary file': function(err, name) {
+        should.not.exist(err);
+        path.existsSync(name).should.be.false;
+      }
+    },
+    
     'when caching an existing resource through HTTP': {
       topic: function(resourceCache) {
         return resourceCache.cacheFromUrl('http://127.0.0.1:8005/', this.callback);

@@ -157,6 +157,11 @@ ResourceCache.prototype = {
     });
   },
   
+  release: function (fileName, callback) {
+    delete this.fileNames[fileName];
+    fs.unlink(fileName, callback);
+  },
+  
   destroy: function () {
     if(typeof(this.dirName) === 'string') {
       this.fileNames.forEach(function (fileName) {

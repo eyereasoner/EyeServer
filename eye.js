@@ -20,6 +20,7 @@ function Eye (options) {
   
   var eye = new F();
   eye.spawn = options.spawn;
+  eye.keepResources = options.keepResources;
   eye.resourceCache = new ResourceCache();
   return eye;
 }
@@ -59,6 +60,7 @@ var eyePrototype = Eye.prototype = {
     
     // set EYE commandline arguments according to options
     var args = [],
+        resources = [],
         resourcesPending = 0;
     noArgOptions.forEach(function (name) {
       if (options[name]) {
@@ -96,6 +98,8 @@ var eyePrototype = Eye.prototype = {
           if(typeof(modifier) === 'string')
             args.push(modifier);
           args.push(fileName);
+          
+          resources.push(fileName);
           resourcesPending--;
           if(!resourcesPending)
             startEye();
@@ -126,6 +130,12 @@ var eyePrototype = Eye.prototype = {
       eye.once('exit', function (code) {
         eye.stdout.removeAllListeners('data');
         eye.stderr.removeAllListeners('data');
+        
+        if(!thiz.keepResources) {
+          resources.forEach(function (resource) {
+            thiz.resourceCache.release(resource);
+          });
+        }
       
         var errorMatch = error.match(errorRegex);
         if (!errorMatch) {
