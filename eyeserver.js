@@ -10,36 +10,44 @@ function EyeServer(options) {
   
   var eye = new Eye();
   
+  eyeServer.use(express.bodyParser());
   eyeServer.get (/^\/$/, handleEyeRequest);
   eyeServer.post(/^\/$/, handleEyeRequest);
   
   function handleEyeRequest (req, res, next) {
     var reqParams = req.query,
+        body = req.body || {},
         data = reqParams.data || [],
-        query = reqParams.query,
+        query = reqParams.query || body.query,
         settings = {};
     
-    // collect data and data URIs
+    // make sure data is an array
     if(typeof(data) === 'string')
-      settings.data = data.split(',');
-    else {
-      settings.data = [];
-      // inspect all data parameters in request parameters
-      data.forEach(function(item){
-        if(!item.match(/^https?:\/\//))
-          // item is N3 data – push it
-          settings.data.push(item);
-        else
-          // item is list of URIs – push each of them
-          settings.data.push.apply(settings.data, item.split(','));
-      });
-    }
+      data = data.split(',');
+    
+    // add body data
+    if(typeof(body.data) === 'string')
+      data.push(body.data);
+    else if(body.data instanceof Array)
+      data.push.apply(data, body.data);
+    
+    // collect data and data URIs
+    settings.data = [];
+    // inspect all data parameters in request parameters
+    data.forEach(function (item) {
+      if(!item.match(/^https?:\/\//))
+        // item is N3 data – push it
+        settings.data.push(item);
+      else
+        // item is list of URIs – push each of them
+        settings.data.push.apply(settings.data, item.split(','));
+    });
     
     // do a reasoner pass by default
     settings.pass = true;
     
     // add query if present
-    if(typeof(query) === 'string') {
+    if(query) {
       settings.query = query;
       delete settings.pass;
     }

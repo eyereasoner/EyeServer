@@ -50,6 +50,21 @@ vows.describe('EyeServer').addBatch({
     
     'receiving a request to /?query=http%3A%2F%2Fex.org%2F1':
       respondsWith(200, 'text/n3', 'with a query', { data: [], query: 'http://ex.org/1' }),
+    
+    'receiving a request to / with form data=http%3A%2F%2Fex.org%2F1':
+      respondsWith(200, 'text/n3', 'with one URI', { data: ['http://ex.org/1'], pass: true }, "POST"),
+    
+    'receiving a request to / with form data=http%3A%2F%2Fex.org%2F1&data=http%3A%2F%2Fex.org%2F2':
+      respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', 'http://ex.org/2'], pass: true }, "POST"),
+    
+    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form data=http%3A%2F%2Fex.org%2F2':
+      respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', 'http://ex.org/2'], pass: true }, "POST"),
+    
+    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form data=%3Aa%20%3Ab%20%3Ac.':
+      respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', ':a :b :c.'], pass: true }, "POST"),
+    
+    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form query=http%3A%2F%2Fex.org%2F2':
+      respondsWith(200, 'text/n3', 'with a URI and a query', { data: ['http://ex.org/1'], query: 'http://ex.org/2' }, "POST"),
   }
 }).export(module);
 
@@ -76,12 +91,17 @@ function respondsWith(status, contentType, description, executeArguments, method
     };
   }
   
-  var path, shouldSucceed = (status >= 200 && status <= 299);
+  var path, form, shouldSucceed = (status >= 200 && status <= 299);
   var context = {
     topic: function () {
-      path = this.context.title.match(/\/[^ ]*/)[0];
+      var urlMatch = this.context.title.match(/(\/[^ ]*)(?: with form (.*))?/);
+      path = urlMatch[1];
+      form = urlMatch[2];
       eyeDummy.shouldSucceed[path] = shouldSucceed;
-      request({ url: 'http://localhost:3000' + path, method: method }, this.callback);
+      request({ url: 'http://localhost:3000' + path,
+                body: form,
+                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                method: method }, this.callback);
     }
   };
   
