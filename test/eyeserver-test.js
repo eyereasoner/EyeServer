@@ -65,6 +65,12 @@ vows.describe('EyeServer').addBatch({
     
     'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form query=http%3A%2F%2Fex.org%2F2':
       respondsWith(200, 'text/n3', 'with a URI and a query', { data: ['http://ex.org/1'], query: 'http://ex.org/2' }, "POST"),
+    
+    'receiving a request to /?callback=mycallback':
+      respondsWith(200, 'application/javascript', 'without data', { data: [], pass: true }, "GET", 'mycallback("out\\"put")'),
+    
+    'receiving a request to /?callback=my{illegal}callback':
+      respondsWith(400, 'application/javascript', 'without data', { data: [], pass: true }, "GET", 'alert("Illegal callback name.")'),
   }
 }).export(module);
 
@@ -75,15 +81,15 @@ var eyeDummy = {
     this.options[path] = options;
     
     if(this.shouldSucceed[path])
-      callback(null, 'output');
+      callback(null, 'out"put');
     else
-      callback('error', null);
+      callback('err"or', null);
   },
   options: {},
   shouldSucceed: {}
 }
 
-function respondsWith(status, contentType, description, executeArguments, method) {
+function respondsWith(status, contentType, description, executeArguments, method, output) {
   if(!method) {
     return {
       'using GET' : respondsWith(status, contentType, description, executeArguments, "GET"),
@@ -115,11 +121,11 @@ function respondsWith(status, contentType, description, executeArguments, method
   
   if(shouldSucceed)
     context['should return the Eye output'] = function(error, response, body) {
-      body.should.eql('output\n');
+      body.should.eql(output || 'out"put\n');
     }
   else
     context['should return the Eye error'] = function(error, response, body) {
-      body.should.eql('error\n');
+      body.should.eql(output || 'err"or\n');
     }
   
   context['should execute Eye ' + description] = function (error, response, body) {

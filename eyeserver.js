@@ -19,6 +19,7 @@ function EyeServer(options) {
         body = req.body || {},
         data = reqParams.data || [],
         query = reqParams.query || body.query,
+        jsonpCallback = reqParams.callback,
         settings = {};
     
     // make sure data is an array
@@ -58,13 +59,22 @@ function EyeServer(options) {
 
     // execute the reasoner and return result or error
     (options.eye || eye).execute(settings, function (error, result) {
-      if(!error) {
-        res.header('Content-Type', 'text/n3');
-        res.send(result + '\n');
+      if(!jsonpCallback) {
+        if(!error) {
+          res.header('Content-Type', 'text/n3');
+          res.send(result + '\n');
+        }
+        else {
+          res.header('Content-Type', 'text/plain');
+          res.send(error + '\n', 400);
+        }
       }
       else {
-        res.header('Content-Type', 'text/plain');
-        res.send(error + '\n', 400);
+        res.header('Content-Type', 'application/javascript');
+        if(jsonpCallback.match(/^[\w\d-_]+$/i))
+          res.send(jsonpCallback + '(' + JSON.stringify(error || result) + ')');
+        else
+          res.send('alert("Illegal callback name.")', 400);
       }
     });
   }
