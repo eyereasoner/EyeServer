@@ -103,8 +103,8 @@ vows.describe('Eye').addBatch({
                              fs.readFileSync(args[2], 'utf8').should.eql(':a :b :c.');
                              args.should.eql(['--nope', '--pass', args[2]]);
                            },
-                           '</tmp/node_12345_0/0.tmp#a> </tmp/node_12345_0/0.tmp#b> </tmp/node_12345_0/0.tmp#c>.',
-                           ':a :b :c.'),
+                           '</tmp/node_12345_0/0.tmp#a> </tmp/node_12345_1/0.tmp#b> </tmp/node_12345_0/0.tmp#c>.',
+                           '<tmp/1#a> <tmp/2#b> <tmp/1#c>.'),
   }
 }).export(module);
 

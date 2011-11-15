@@ -2,7 +2,7 @@ var spawn = require('child_process').spawn,
     ResourceCache = require('./resourcecache');
 
 var commentRegex = /^#.*$\n/mg,
-    localVariableRegex = /<\/tmp\/[^#]+#([^>]+)>/g,
+    localIdentifierRegex = /<\/tmp\/([^#]+)#([^>]+>)/g,
     errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
     
 var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
@@ -139,8 +139,11 @@ var eyePrototype = Eye.prototype = {
       
         var errorMatch = error.match(errorRegex);
         if (!errorMatch) {
+          var prefixes = {}, prefixCount = 0;
           output = output.replace(commentRegex, '');
-          output = output.replace(localVariableRegex, ':$1');
+          output = output.replace(localIdentifierRegex, function (match, path, name) {
+            return (prefixes[path] || (prefixes[path] = '<tmp/' + (++prefixCount) + '#')) + name;
+          });
           output = output.trim();
           callback && callback(null, output);
         }
