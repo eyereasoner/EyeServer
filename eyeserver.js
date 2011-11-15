@@ -10,7 +10,10 @@ function EyeServer(options) {
   
   var eye = new Eye();
   
-  eyeServer.get(/^\/$/, function (req, res, next) {
+  eyeServer.get (/^\/$/, handleEyeRequest);
+  eyeServer.post(/^\/$/, handleEyeRequest);
+  
+  function handleEyeRequest (req, res, next) {
     var reqParams = req.query,
         data = reqParams.data || [],
         query = reqParams.query,
@@ -56,7 +59,7 @@ function EyeServer(options) {
         res.send(error + '\n', 400);
       }
     });
-  });
+  }
   
   return eyeServer;
 }

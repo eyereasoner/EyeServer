@@ -68,13 +68,20 @@ var eyeDummy = {
   shouldSucceed: {}
 }
 
-function respondsWith(status, contentType, executionDescription, executeArguments) {
+function respondsWith(status, contentType, description, executeArguments, method) {
+  if(!method) {
+    return {
+      'using GET' : respondsWith(status, contentType, description, executeArguments, "GET"),
+      'using POST': respondsWith(status, contentType, description, executeArguments, "POST")
+    };
+  }
+  
   var path, shouldSucceed = (status >= 200 && status <= 299);
   var context = {
     topic: function () {
-      path = this.context.name.match(/[^ ]+$/)[0];
+      path = this.context.title.match(/\/[^ ]*/)[0];
       eyeDummy.shouldSucceed[path] = shouldSucceed;
-      request('http://localhost:3000' + path, this.callback);
+      request({ url: 'http://localhost:3000' + path, method: method }, this.callback);
     }
   };
   
@@ -95,7 +102,7 @@ function respondsWith(status, contentType, executionDescription, executeArgument
       body.should.eql('error\n');
     }
   
-  context['should execute Eye ' + executionDescription] = function (error, response, body) {
+  context['should execute Eye ' + description] = function (error, response, body) {
     eyeDummy.options[path].should.eql(executeArguments);
   }
   
