@@ -33,60 +33,75 @@ vows.describe('Eye').addBatch({
   'An Eye instance': {
     'when executed without arguments':
       shouldExecuteEyeWith(null,
-                           "with 'nope'",
-                           ['--nope']),
+                           "with 'nope' and 'pass'",
+                           ['--nope', '--pass']),
     
     'when executed with nope to false':
       shouldExecuteEyeWith({ nope: false },
                            "without 'nope'",
-                           []),
+                           ['--pass']),
+    
+    'when executed with nope to false':
+      shouldExecuteEyeWith({ pass: false },
+                           "without 'pass'",
+                           ['--nope']),
     
     'when executed with one data URI':
       shouldExecuteEyeWith({ data: 'http://ex.org/1' },
                            "with one data URI",
-                           ['--nope', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1']),
     
     'when executed with multiple data URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://ex.org/2'] },
                            "with multiple data URIs",
-                           ['--nope', 'http://ex.org/1', 'http://ex.org/2']),
+                           ['--nope', '--pass', 'http://ex.org/1', 'http://ex.org/2']),
     
     'when executed with localhost URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://localhost/2', 'https://localhost/3'] },
                            "without the localhost URIs",
-                           ['--nope', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1']),
     
     'when executed with 127.0.0.1 URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://127.0.0.1/2', 'https://127.0.0.1/3'] },
                            "without the 127.0.0.1 URIs",
-                           ['--nope', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1']),
     
     'when executed with ::1 URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://::1/2', 'https://::1/3'] },
                            "without the ::1 URIs",
-                           ['--nope', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1']),
     
     'when executed with file URIs':
        shouldExecuteEyeWith({ data: ['http://ex.org/1', 'file://example/'] },
                             "without the file URIs",
-                            ['--nope', 'http://ex.org/1']),
+                            ['--nope', '--pass', 'http://ex.org/1']),
     
     'when executed with an inexisting URI':
       shouldExecuteEyeWith({ data: ['http://ex.org/doesnotexist'] },
                            "with the URI",
-                           ['--nope', 'http://ex.org/doesnotexist'],
+                           ['--nope', '--pass', 'http://ex.org/doesnotexist'],
                            null, null,
                            "** ERROR ** Message",
                            "Message"),
+    
+    'when executed with a query URI':
+      shouldExecuteEyeWith({ query: 'http://ex.org/1' },
+                           "with the query URI and without 'pass'",
+                           ['--nope', '--query', 'http://ex.org/1' ]),
+    
+    'when executed with multiple query URIs':
+      shouldExecuteEyeWith({ query: ['http://ex.org/1', 'http://ex.org/2'] },
+                           "with the first query URI and without 'pass'",
+                           ['--nope', '--query', 'http://ex.org/1' ]),
     
     'when executed with literal data':
       shouldExecuteEyeWith({ data: ':a :b :c.' },
                            'with a temporary file',
                            function (args) {
-                             args.length.should.eql(2);
-                             args[1].should.match(/^\/tmp\//$);
-                             fs.readFileSync(args[1], 'utf8').should.eql(':a :b :c.');
-                             args.should.eql(['--nope', args[1]]);
+                             args.length.should.eql(3);
+                             args[2].should.match(/^\/tmp\//$);
+                             fs.readFileSync(args[2], 'utf8').should.eql(':a :b :c.');
+                             args.should.eql(['--nope', '--pass', args[2]]);
                            },
                            '</tmp/node_12345_0/0.tmp#a> </tmp/node_12345_0/0.tmp#b> </tmp/node_12345_0/0.tmp#c>.',
                            ':a :b :c.'),

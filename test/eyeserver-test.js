@@ -47,6 +47,9 @@ vows.describe('EyeServer').addBatch({
     
     'receiving a request to /?data=%3Aa%20%3Ab%20%3Ac.':
       respondsWith(200, 'text/n3', 'with N3 data', { data: [':a :b :c.'], pass: true }),
+    
+    'receiving a request to /?query=http%3A%2F%2Fex.org%2F1':
+      respondsWith(200, 'text/n3', 'with a query', { data: [], query: 'http://ex.org/1' }),
   }
 }).export(module);
 

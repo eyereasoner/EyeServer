@@ -11,6 +11,7 @@ function EyeServer(options) {
   eyeServer.get(/^\/$/, function (req, res, next) {
     var reqParams = req.query,
         data = reqParams.data || [],
+        query = reqParams.query,
         settings = {};
     
     // collect data and data URIs
@@ -31,6 +32,12 @@ function EyeServer(options) {
     
     // do a reasoner pass by default
     settings.pass = true;
+    
+    // add query if present
+    if(typeof(query) === 'string') {
+      settings.query = query;
+      delete settings.pass;
+    }
 
     // add debug information if requested
     if(options.debug)

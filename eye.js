@@ -53,6 +53,10 @@ var eyePrototype = Eye.prototype = {
       }
     }
     
+    // do a pass if no query specified, and pass not explicitely disabled
+    if (!options.query && typeof(options.pass) === 'undefined')
+      options.pass = true;
+    
     // set EYE commandline arguments according to options
     var args = [],
         resourcesPending = 0;
@@ -65,13 +69,23 @@ var eyePrototype = Eye.prototype = {
     // add data URIs
     if(typeof(options.data) === "string")
       options.data = [options.data];
-
-    options.data.forEach(function (dataItem) {
+    options.data.forEach(addDataItem);
+    
+    // add query URI
+    if(typeof(options.query) === "string")
+      addDataItem(options.query, '--query');
+    else if(options.query instanceof Array)
+      addDataItem(options.query[0], '--query');
+    
+    function addDataItem(dataItem, modifier) {
       // does it contain a protocol name of some sort?
       if(dataItem.match(/^\w+:/)) {
         // is it HTTP(S), but not on a reserved domain?
-        if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/))
+        if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/)) {
+          if(typeof(modifier) === 'string')
+            args.push(modifier);
           args.push(dataItem);
+        }
       }
       else {
         resourcesPending++;
@@ -79,13 +93,15 @@ var eyePrototype = Eye.prototype = {
           if(err)
             return callback(err, null);
 
+          if(typeof(modifier) === 'string')
+            args.push(modifier);
           args.push(fileName);
           resourcesPending--;
           if(!resourcesPending)
             startEye();
         });
       }
-    });
+    }
     
     if(!resourcesPending)
       startEye();
