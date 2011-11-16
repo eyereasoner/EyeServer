@@ -99,7 +99,7 @@ vows.describe('Eye').addBatch({
                            'with a temporary file',
                            function (args) {
                              args.length.should.eql(3);
-                             args[2].should.match(/^\/tmp\//$);
+                             args[2].should.match(/^\/tmp\/\w/);
                              fs.readFileSync(args[2], 'utf8').should.eql(':a :b :c.');
                              args.should.eql(['--nope', '--pass', args[2]]);
                            },
