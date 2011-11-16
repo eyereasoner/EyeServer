@@ -60,6 +60,7 @@ function EyeServer(options) {
     // execute the reasoner and return result or error
     (options.eye || eye).execute(settings, function (error, result) {
       if(!jsonpCallback) {
+        res.header('Access-Control-Allow-Origin', '*');
         if(!error) {
           res.header('Content-Type', 'text/n3');
           res.send(result + '\n');

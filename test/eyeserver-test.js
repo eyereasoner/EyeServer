@@ -119,6 +119,11 @@ function respondsWith(status, contentType, description, executeArguments, method
     response.headers.should.have.property('content-type', contentType)
   }
   
+  if(contentType !== 'application/javascript')
+    context['should respond with Access-Control-Allow-Origin *'] = function(error, response, body) {
+      response.headers.should.have.property('access-control-allow-origin', '*');
+    }
+  
   if(shouldSucceed)
     context['should return the Eye output'] = function(error, response, body) {
       body.should.eql(output || 'out"put\n');
