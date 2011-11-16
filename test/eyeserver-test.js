@@ -51,19 +51,20 @@ vows.describe('EyeServer').addBatch({
     'receiving a request to /?query=http%3A%2F%2Fex.org%2F1':
       respondsWith(200, 'text/n3', 'with a query', { data: [], query: 'http://ex.org/1' }),
     
-    'receiving a request to / with form data=http%3A%2F%2Fex.org%2F1':
+    // note: adding query parameters to obtain unique URIs for test validation
+    'receiving a request to /?f1 with form data=http%3A%2F%2Fex.org%2F1':
       respondsWith(200, 'text/n3', 'with one URI', { data: ['http://ex.org/1'], pass: true }, "POST"),
     
-    'receiving a request to / with form data=http%3A%2F%2Fex.org%2F1&data=http%3A%2F%2Fex.org%2F2':
+    'receiving a request to /?f2 with form data=http%3A%2F%2Fex.org%2F1&data=http%3A%2F%2Fex.org%2F2':
       respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', 'http://ex.org/2'], pass: true }, "POST"),
     
-    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form data=http%3A%2F%2Fex.org%2F2':
+    'receiving a request to /?f3&data=http%3A%2F%2Fex.org%2F1 with form data=http%3A%2F%2Fex.org%2F2':
       respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', 'http://ex.org/2'], pass: true }, "POST"),
     
-    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form data=%3Aa%20%3Ab%20%3Ac.':
+    'receiving a request to /?f4&data=http%3A%2F%2Fex.org%2F1 with form data=%3Aa%20%3Ab%20%3Ac.':
       respondsWith(200, 'text/n3', 'with two URIs', { data: ['http://ex.org/1', ':a :b :c.'], pass: true }, "POST"),
     
-    'receiving a request to /?data=http%3A%2F%2Fex.org%2F1 with form query=http%3A%2F%2Fex.org%2F2':
+    'receiving a request to /?f5&data=http%3A%2F%2Fex.org%2F1 with form query=http%3A%2F%2Fex.org%2F2':
       respondsWith(200, 'text/n3', 'with a URI and a query', { data: ['http://ex.org/1'], query: 'http://ex.org/2' }, "POST"),
     
     'receiving a request to /?callback=mycallback':
