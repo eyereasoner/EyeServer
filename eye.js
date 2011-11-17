@@ -3,6 +3,7 @@ var spawn = require('child_process').spawn,
 
 var commentRegex = /^#.*$\n/mg,
     localIdentifierRegex = /<\/tmp\/([^#]+)#([^>]+>)/g,
+    prefixDeclarationRegex = /@prefix (\w*:) <([^>]+)>.\n/g,
     errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
     
 var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
@@ -139,19 +140,54 @@ var eyePrototype = Eye.prototype = {
       
         var errorMatch = error.match(errorRegex);
         if (!errorMatch) {
-          var prefixes = {}, prefixCount = 0;
-          output = output.replace(commentRegex, '');
-          output = output.replace(localIdentifierRegex, function (match, path, name) {
-            return (prefixes[path] || (prefixes[path] = '<tmp/' + (++prefixCount) + '#')) + name;
-          });
-          output = output.trim();
-          callback && callback(null, output);
+          callback && callback(null, thiz.clean(output));
         }
         else {
          callback(errorMatch[1], null);
         }
       });
     }
+  },
+  
+  clean: function(n3) {
+    // remove comments
+    n3 = n3.replace(commentRegex, '');
+    
+    // change local filename identifiers into temporary identifiers
+    var localIds = {}, localIdCount = 0;
+    n3 = n3.replace(localIdentifierRegex, function (match, path, name) {
+      return (localIds[path] || (localIds[path] = '<tmp/' + (++localIdCount) + '#')) + name;
+    });
+    
+    // remove prefix declarations from the document, storing them in an object
+    var prefixes = {};
+    n3 = n3.replace(prefixDeclarationRegex, function (match, prefix, namespace) {
+      prefixes[prefix] = namespace;
+      return '';
+    });
+    
+    // remove unnecessary whitespace from the document
+    n3 = n3.trim();
+    
+    // find the used prefixes
+    var prefixLines = [];
+    for(var prefix in prefixes) {
+      var namespace = prefixes[prefix];
+      
+      // EYE does not use prefixes of namespaces ending in a slash (instead of a hash),
+      // so we apply them manually
+      if(namespace.match(/\/$/))
+        // warning: this could wreck havoc inside string literals
+        n3 = n3.replace(new RegExp('<' + escapeForRegExp(namespace) + '(\\w+)>', 'gm'), prefix + '$1');
+
+      // add the prefix if it's used
+      // (we conservatively employ a wide definition of "used")
+      if(n3.match(prefix))
+        prefixLines.push("@prefix ", prefix, " <", namespace, ">.\n");
+    }
+    
+    // join the used prefixes and the rest of the N3
+    return !prefixLines.length ? n3 : (prefixLines.join('') + '\n' + n3);
   }
 }
 
@@ -165,6 +201,10 @@ for(var propertyName in eyePrototype) {
       }
     })(propertyName);
   }
+}
+
+function escapeForRegExp(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
 module.exports = Eye;
