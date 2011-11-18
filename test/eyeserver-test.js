@@ -21,10 +21,14 @@ vows.describe('EyeServer').addBatch({
   },
   
   'An EyeServer instance': {
-    topic: function() {
+    topic: function () {
       server = new eyeserver({ eye: eyeDummy, debug: true });
       server.listen(13705);
       return server;
+    },
+    
+    teardown: function () {
+      server.close();
     },
     
     'receiving a request to /':

@@ -4,6 +4,7 @@ var vows = require('vows'),
     path = require('path'),
     express = require('express');
 var ResourceCache = require('../resourcecache');
+var dummyServer;
 
 vows.describe('ResourceCache').addBatch({
   'The ResourceCache module': {
@@ -24,7 +25,19 @@ vows.describe('ResourceCache').addBatch({
     }
   },
   'A ResourceCache': {
-    topic: new ResourceCache(),
+    topic: function () {
+      dummyServer = express.createServer();
+      dummyServer.get(/^\/$/, function (req, res, next) { res.send('contents', 200); });
+      dummyServer.listen(14207);
+      return new ResourceCache()
+    },
+    
+    tearDown: function () {
+      // unfortunately, tearDown is run directly after the tests have been started,
+      // although some of the requests have not been made yet
+      // (only an issue when executing this file directly from node, not with vows)
+      setTimeout(function () { dummyServer.close(); }, 200);
+    },
     
     'when asked for its directory name': {
       topic: function(resourceCache) {
@@ -116,7 +129,3 @@ vows.describe('ResourceCache').addBatch({
     }
   }
 }).export(module);
-
-dummyServer = express.createServer();
-dummyServer.get(/^\/$/, function (req, res, next) { res.send('contents', 200); });
-dummyServer.listen(14207);
