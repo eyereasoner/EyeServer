@@ -1,7 +1,7 @@
 var vows = require('vows'),
     should = require('should'),
     fs = require('fs'),
-    SpawnAsserter = require('./spawn-asserter');
+    SpawnAsserter = require('./spawnasserter');
 var eye = require('../eye.js');
 
 vows.describe('Eye').addBatch({
