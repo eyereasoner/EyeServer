@@ -72,6 +72,16 @@ vows.describe('EyeServer').addBatch({
     
     'receiving a request to /?callback=my{illegal}callback':
       respondsWith(400, 'application/javascript', 'without data', { data: [], pass: true }, "GET", 'alert("Illegal callback name.")'),
+    
+    'receiving an OPTIONS request on /': {
+      topic: function () {
+        request({ url: 'http://localhost:13705/', method: 'OPTIONS' }, this.callback);
+      },
+      
+      'should respond with Access-Control-Allow-Origin *': function (error, response, body) {
+        response.headers.should.have.property('access-control-allow-origin', '*');
+      }
+    }
   }
 }).export(module);
 

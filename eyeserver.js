@@ -13,6 +13,7 @@ function EyeServer(options) {
   eyeServer.use(express.bodyParser());
   eyeServer.get (/^\/$/, handleEyeRequest);
   eyeServer.post(/^\/$/, handleEyeRequest);
+  eyeServer.options(/^\/$/, handleOptions);
   
   function handleEyeRequest (req, res, next) {
     var reqParams = req.query,
@@ -60,7 +61,7 @@ function EyeServer(options) {
     // execute the reasoner and return result or error
     (options.eye || eye).execute(settings, function (error, result) {
       if(!jsonpCallback) {
-        res.header('Access-Control-Allow-Origin', '*');
+        setHeaders(req, res);
         if(!error) {
           res.header('Content-Type', 'text/n3');
           res.send(result + '\n');
@@ -78,6 +79,17 @@ function EyeServer(options) {
           res.send('alert("Illegal callback name.")', 400);
       }
     });
+  }
+  
+  function handleOptions(req, res, next) {
+    setHeaders(req, res);
+    res.header('Content-Type', 'text/plain');
+    res.send('');
+  }
+  
+  function setHeaders(req, res) {
+    res.header('X-Powered-By', 'EYE Server');
+    res.header('Access-Control-Allow-Origin', '*');
   }
   
   return eyeServer;
