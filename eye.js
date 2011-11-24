@@ -16,9 +16,11 @@ var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',
 function Eye (options) {
   options = options || {};
   
+  // dummy constructor to enable Eye construction without new
   function F() {};
   F.prototype = Eye.prototype;
   
+  // create and return new Eye object
   var eye = new F();
   eye.spawn = options.spawn;
   eye.keepResources = options.keepResources;

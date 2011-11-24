@@ -13,10 +13,12 @@ vows.describe('EyeServer').addBatch({
     
     'should make EyeServer objects': function (eyeserver) {
       eyeserver().constructor.should.eql(eyeserver);
+      eyeserver().should.be.an.instanceof(eyeserver);
     },
     
     'should be an EyeServer constructor': function (eyeserver) {
       new eyeserver().constructor.should.eql(eyeserver);
+      new eyeserver().should.be.an.instanceof(eyeserver);
     }
   },
   

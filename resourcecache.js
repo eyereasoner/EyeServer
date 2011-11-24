@@ -6,15 +6,17 @@ var fs = require('fs'),
 var fileCounter = 0;
 
 function ResourceCache() {
+  // dummy constructor to enable ResourceCache construction without new
   function F() {};
   F.prototype = ResourceCache.prototype;
-  var resourceCache = new F();
   
+  // create and return new ResourceCache object
+  var resourceCache = new F();
+  // destructor-like functionality
   process.setMaxListeners(100);
   process.once('exit', function () {
     resourceCache.destroy();
   });
-  
   return resourceCache;
 }
 

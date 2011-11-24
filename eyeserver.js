@@ -4,12 +4,19 @@ var express = require('express'),
 function EyeServer(options) {
   options = options || {};
   
-  eyeServer = express.createServer();
-  eyeServer.constructor = EyeServer;
-  eyeServer.prototype = EyeServer.prototype;
+  // dummy constructor to enable EyeServer construction without new
+  function F() {};
+  F.prototype = EyeServer.prototype;
   
+  // create new EyeServer, inheriting from express.HTTPServer
+  eyeServer = new F();
+  eyeServer.constructor = EyeServer;
+  express.HTTPServer.call(eyeServer, []);
+  
+  // intialize reasoner
   var eye = new Eye();
   
+  // initialize server
   eyeServer.use(express.bodyParser());
   eyeServer.get (/^\/$/, handleEyeRequest);
   eyeServer.post(/^\/$/, handleEyeRequest);
@@ -94,5 +101,9 @@ function EyeServer(options) {
   
   return eyeServer;
 }
+
+// inherit from express.HTTPServer
+EyeServer.prototype.constructor = EyeServer;
+EyeServer.prototype.__proto__ = express.HTTPServer.prototype;
 
 module.exports = EyeServer;
