@@ -28,6 +28,15 @@ vows.describe('Eye').addBatch({
     
     'should have an execute function': function (eye) {
       eye.execute.should.be.a('function');
+    },
+    
+    'should expose flag names': function (eye) {
+      eye.should.have.property('flagNames');
+      eye.flagNames.should.eql(['nope', 'noBranch', 'noDistinct', 'noQvars',
+                                'noQnames', 'quiet', 'quickFalse', 'quickPossible',
+                                'quickAnswer', 'think', 'ances', 'ignoreSyntaxError',
+                                'pcl', 'strings', 'debug', 'profile', 'version', 'help',
+                                'pass', 'passAll']);
     }
   },
   'An Eye instance': {
@@ -45,6 +54,19 @@ vows.describe('Eye').addBatch({
       shouldExecuteEyeWith({ pass: false },
                            "without 'pass'",
                            ['--nope']),
+    
+    'when executed with boolean options':
+      shouldExecuteEyeWith({ 'nope': true, 'noBranch': true, 'noDistinct': true,
+                             'noQvars': true, 'noQnames': true, 'quiet': true,
+                             'quickFalse': true, 'quickPossible': true, 'quickAnswer': true,
+                             'think': true, 'ances': true, 'ignoreSyntaxError': true, 'pcl': true,
+                             'strings': true, 'debug': true, 'profile': true, 'version': true,
+                             'help': true, 'pass': true, 'passAll': true },
+                           "should pass the options",
+                           ['--nope', '--no-branch', '--no-distinct', '--no-qvars', '--no-qnames',
+                            '--quiet', '--quick-false', '--quick-possible', '--quick-answer',
+                            '--think', '--ances', '--ignore-syntax-error', '--pcl', '--strings',
+                            '--debug', '--profile', '--version', '--help', '--pass', '--pass-all']),
     
     'when executed with one data URI':
       shouldExecuteEyeWith({ data: 'http://ex.org/1' },

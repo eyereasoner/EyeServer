@@ -36,6 +36,24 @@ vows.describe('EyeServer').addBatch({
     'receiving a request to /':
       respondsWith(200, 'text/n3', 'without data', { data: [], pass: true }),
     
+    'receiving a request to /?quickAnswer':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: true }),
+    
+    'receiving a request to /?quickanswer':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: true }),
+    
+    'receiving a request to /?quick-answer':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: true }),
+    
+    'receiving a request to /?quickAnswer=0':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: false }),
+    
+    'receiving a request to /?quickanswer=false':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: false }),
+    
+    'receiving a request to /?quick-answer=1':
+      respondsWith(200, 'text/n3', 'with quickAnswer', { data: [], pass: true, quickAnswer: true }),
+    
     'receiving a request to /?data=http%3A%2F%2Fex.org%2Ferror':
       respondsWith(400, 'text/plain', 'and receive an error', { data: ['http://ex.org/error'], pass: true }),
     

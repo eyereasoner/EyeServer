@@ -193,6 +193,8 @@ var eyePrototype = Eye.prototype = {
   }
 }
 
+Object.defineProperty(Eye, 'flagNames', { value: noArgOptions });
+
 // Expose each of the Eye instance functions also as static functions.
 // They behave as instance functions on a new Eye object.
 for(var propertyName in eyePrototype) {

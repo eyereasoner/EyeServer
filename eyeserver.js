@@ -1,6 +1,11 @@
 var express = require('express'),
     Eye = require('./eye');
 
+var eyeFlagNames = {};
+Eye.flagNames.forEach(function (option) {
+  eyeFlagNames[option.toLowerCase()] = option;
+});
+
 function EyeServer(options) {
   options = options || {};
   
@@ -59,6 +64,13 @@ function EyeServer(options) {
     if(query) {
       settings.query = query;
       delete settings.pass;
+    }
+    
+    // add boolean flags
+    for(var param in reqParams) {
+      var eyeFlagName = eyeFlagNames[param.replace(/-/g, '').toLowerCase()];
+      if(eyeFlagName)
+        settings[eyeFlagName] = !reqParams[param].match(/^0|false$/i);
     }
 
     // add debug information if requested
