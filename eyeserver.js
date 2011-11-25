@@ -7,8 +7,6 @@ Eye.flagNames.forEach(function (option) {
 });
 
 function EyeServer(options) {
-  options = options || {};
-  
   // dummy constructor to enable EyeServer construction without new
   function F() {};
   F.prototype = EyeServer.prototype;
@@ -18,22 +16,33 @@ function EyeServer(options) {
   eyeServer.constructor = EyeServer;
   express.HTTPServer.call(eyeServer, []);
   
-  // intialize reasoner
-  var eye = new Eye();
+  // apply settings and defaults
+  eyeServer.settings = options || {};
+  eyeServer.settings.eye = eyeServer.settings.eye || new Eye();
   
   // initialize server
   eyeServer.use(express.bodyParser());
-  eyeServer.get (/^\/$/, handleEyeRequest);
-  eyeServer.post(/^\/$/, handleEyeRequest);
-  eyeServer.options(/^\/$/, handleOptions);
+  eyeServer.get (/^\/$/, proxy(eyeServer, eyeServer.handleEyeRequest));
+  eyeServer.post(/^\/$/, proxy(eyeServer, eyeServer.handleEyeRequest));
+  eyeServer.options(/^\/$/, proxy(eyeServer, eyeServer.handleEyeOptionsRequest));
   
-  function handleEyeRequest (req, res, next) {
-    var reqParams = req.query,
+  return eyeServer;
+}
+
+EyeServer.prototype = {
+  constructor: EyeServer,
+  
+  // inherit from express.HTTPServer
+  __proto__: express.HTTPServer.prototype,
+  
+  handleEyeRequest: function (req, res, next) {
+    var self = this,
+        reqParams = req.query,
         body = req.body || {},
         data = reqParams.data || [],
         query = reqParams.query || body.query,
         jsonpCallback = reqParams.callback,
-        settings = {};
+        eyeParams = {};
     
     // make sure data is an array
     if(typeof(data) === 'string')
@@ -46,41 +55,41 @@ function EyeServer(options) {
       data.push.apply(data, body.data);
     
     // collect data and data URIs
-    settings.data = [];
+    eyeParams.data = [];
     // inspect all data parameters in request parameters
     data.forEach(function (item) {
       if(!item.match(/^https?:\/\//))
         // item is N3 data – push it
-        settings.data.push(item);
+        eyeParams.data.push(item);
       else
         // item is list of URIs – push each of them
-        settings.data.push.apply(settings.data, item.split(','));
+        eyeParams.data.push.apply(eyeParams.data, item.split(','));
     });
     
     // do a reasoner pass by default
-    settings.pass = true;
+    eyeParams.pass = true;
     
     // add query if present
     if(query) {
-      settings.query = query;
-      delete settings.pass;
+      eyeParams.query = query;
+      delete eyeParams.pass;
     }
     
     // add boolean flags
     for(var param in reqParams) {
       var eyeFlagName = eyeFlagNames[param.replace(/-/g, '').toLowerCase()];
       if(eyeFlagName)
-        settings[eyeFlagName] = !reqParams[param].match(/^0|false$/i);
+        eyeParams[eyeFlagName] = !reqParams[param].match(/^0|false$/i);
     }
 
     // add debug information if requested
-    if(options.debug)
-      settings.originalUrl = req.originalUrl;
+    if(this.settings.debug)
+      eyeParams.originalUrl = req.originalUrl;
 
     // execute the reasoner and return result or error
-    (options.eye || eye).execute(settings, function (error, result) {
+    this.settings.eye.execute(eyeParams, function (error, result) {
       if(!jsonpCallback) {
-        setHeaders(req, res);
+        self.setDefaultHeaders(req, res);
         if(!error) {
           res.header('Content-Type', 'text/n3');
           res.send(result + '\n');
@@ -98,24 +107,22 @@ function EyeServer(options) {
           res.send('alert("Illegal callback name.")', 400);
       }
     });
-  }
+  },
   
-  function handleOptions(req, res, next) {
-    setHeaders(req, res);
+  handleEyeOptionsRequest: function(req, res, next) {
+    this.setDefaultHeaders(req, res);
     res.header('Content-Type', 'text/plain');
     res.send('');
-  }
+  },
   
-  function setHeaders(req, res) {
+  setDefaultHeaders: function(req, res) {
     res.header('X-Powered-By', 'EYE Server');
     res.header('Access-Control-Allow-Origin', '*');
   }
-  
-  return eyeServer;
 }
 
-// inherit from express.HTTPServer
-EyeServer.prototype.constructor = EyeServer;
-EyeServer.prototype.__proto__ = express.HTTPServer.prototype;
+function proxy(object, method) {
+  return function() { method.apply(object, arguments); };
+}
 
 module.exports = EyeServer;
