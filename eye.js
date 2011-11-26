@@ -3,7 +3,7 @@ var spawn = require('child_process').spawn,
 
 var commentRegex = /^#.*$\n/mg,
     localIdentifierRegex = /<\/tmp\/([^#]+)#([^>]+>)/g,
-    prefixDeclarationRegex = /@prefix (\w*:) <([^>]+)>.\n/g,
+    prefixDeclarationRegex = /@prefix ([\w-]*:) <([^>]+)>.\n/g,
     errorRegex = /^\*\* ERROR \*\*\s*(.*)$/m;
     
 var noArgOptions = ['nope', 'noBranch', 'noDistinct', 'noQvars',

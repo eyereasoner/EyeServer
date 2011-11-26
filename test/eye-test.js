@@ -132,23 +132,23 @@ vows.describe('Eye').addBatch({
       shouldExecuteEyeWith({},
                            'and remove unused prefixes',
                            [ '--nope', '--pass' ],
-                           '@prefix ex1: <http://ex.org/1#>.\n'
-                           + '@prefix ex2: <http://ex.org/2#>.\n'
-                           + '@prefix ex3: <http://ex.org/3/>.\n'
-                           + 'ex2:a ex2:b ex2:c.',
-                           '@prefix ex2: <http://ex.org/2#>.\n\n'
-                           + 'ex2:a ex2:b ex2:c.'),
+                           '@prefix ex-1: <http://ex.org/1#>.\n'
+                           + '@prefix ex-2: <http://ex.org/2#>.\n'
+                           + '@prefix ex-3: <http://ex.org/3/>.\n'
+                           + 'ex-2:a ex-2:b ex-2:c.',
+                           '@prefix ex-2: <http://ex.org/2#>.\n\n'
+                           + 'ex-2:a ex-2:b ex-2:c.'),
     
     'when executed with data that results in prefixes for unhashed namespaces':
       shouldExecuteEyeWith({},
                            'and use the prefixes for unhashed namespaces as well',
                            [ '--nope', '--pass' ],
-                           '@prefix ex1: <http://ex.org/1/>.\n'
-                           + '@prefix ex2: <http://ex.org/2/>.\n'
+                           '@prefix ex-1: <http://ex.org/1/>.\n'
+                           + '@prefix ex-2: <http://ex.org/2/>.\n'
                            + '<http://ex.org/1/a> <http://ex.org/2/b> <http://ex.org/1/c>.',
-                           '@prefix ex1: <http://ex.org/1/>.\n'
-                            + '@prefix ex2: <http://ex.org/2/>.\n\n'
-                            + 'ex1:a ex2:b ex1:c.'),
+                           '@prefix ex-1: <http://ex.org/1/>.\n'
+                            + '@prefix ex-2: <http://ex.org/2/>.\n\n'
+                            + 'ex-1:a ex-2:b ex-1:c.'),
   }
 }).export(module);
 
