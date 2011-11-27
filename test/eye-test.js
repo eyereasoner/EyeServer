@@ -201,7 +201,7 @@ function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, exp
     topic: executeEyeWith(options, error, error ? null : (eyeOutput || "eyeOutput"))
   };
 
-  context['should execute eye ' + description] = function (err, result, spawner) {
+  context['should execute EYE ' + description] = function (err, result, spawner) {
     spawner.command.should.eql('eye');
     if(typeof(expectedArgs) !== 'function')
       spawner.args.should.eql(expectedArgs);
@@ -210,12 +210,12 @@ function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, exp
   }
   
   if(!error)
-    context['should return the eye output'] = function (err, result) {
+    context['should return the EYE output'] = function (err, result) {
       should.not.exist(err);
       result.should.equal(expectedOutput || "eyeOutput");
     };
   else
-    context['should return the eye error'] = function (err, result) {
+    context['should return the EYE error'] = function (err, result) {
       err.should.equal(errorMessage);
       should.not.exist(result);
     };
