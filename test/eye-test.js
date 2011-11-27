@@ -1,6 +1,7 @@
 var vows = require('vows'),
     should = require('should'),
     fs = require('fs'),
+    EventEmitter = require('events').EventEmitter;
     SpawnAsserter = require('./spawnasserter');
 var eye = require('../eye.js');
 
@@ -149,6 +150,28 @@ vows.describe('Eye').addBatch({
                            '@prefix ex-1: <http://ex.org/1/>.\n'
                             + '@prefix ex-2: <http://ex.org/2/>.\n\n'
                             + 'ex-1:a ex-2:b ex-1:c.'),
+    'when executed, returns an object that': (function () {
+      var spawner = new SpawnAsserter(),
+          emitter;
+      return {
+        topic: function() {
+          emitter = new eye({ spawn: spawner.spawn }).execute();
+          return { result: emitter, spawner: spawner };
+        },
+        'should be an EventEmitter': function (param) {
+          should.exist(param.result);
+          param.result.should.be.an.instanceof(EventEmitter);
+        },
+        'should terminate the EYE process when canceled': function (param) {
+          should.not.exist(param.spawner.killed);
+          param.result.cancel();
+          should.exist(param.spawner.killed);
+          param.spawner.listeners('exit').should.be.empty;
+          param.spawner.stdout.listeners('data').should.be.empty;
+          param.spawner.stderr.listeners('data').should.be.empty;
+        },
+      };
+    })(),
   }
 }).export(module);
 
@@ -162,9 +185,12 @@ function executeEyeWith(options, errorText, outputText) {
       errorText && spawner.stderr.emit('data', errorText);
       outputText && spawner.stdout.emit('data', outputText);
       spawner.emit('exit');
+      spawner.listeners('exit').should.be.empty;
+      spawner.stdout.listeners('data').should.be.empty;
+      spawner.stderr.listeners('data').should.be.empty;
     });
     
-    return eyeInstance.execute(options, function (err, result) {
+    eyeInstance.execute(options, function (err, result) {
       callback(err, result, spawner);
     });
   };

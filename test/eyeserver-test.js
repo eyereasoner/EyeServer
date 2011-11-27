@@ -1,6 +1,7 @@
 var vows = require('vows'),
     should = require('should'),
-    request = require('request');
+    request = require('request'),
+    EventEmitter = require('events').EventEmitter;
 var eyeserver = require('../eyeserver.js');
 
 vows.describe('EyeServer').addBatch({
@@ -105,7 +106,29 @@ vows.describe('EyeServer').addBatch({
       'should respond with Access-Control-Allow-Origin *': function (error, response, body) {
         response.headers.should.have.property('access-control-allow-origin', '*');
       }
-    }
+    },
+    
+    'receiving a request that is aborted': (function () {
+      var canceled;
+      return {
+        topic: function () {
+          // setup dummy eye with dummy eyeProcess
+          var eyeProcess = { cancel: function () { canceled = true; } };
+          var server = new eyeserver({ eye: { execute: function () { return eyeProcess; } } });
+          // set up dummy request
+          var req = new EventEmitter();
+          req.query = {};
+          server.handleEyeRequest(req, { header: function () {} });
+          // abort request
+          req.emit('close');
+          
+          return true;
+        },
+        'should cancel Eye': function () {
+          should.exist(canceled);
+        }
+      }
+    })()
   }
 }).export(module);
 
@@ -119,6 +142,8 @@ var eyeDummy = {
       callback(null, 'out"put');
     else
       callback('err"or', null);
+    
+    return {};
   },
   options: {},
   shouldSucceed: {}

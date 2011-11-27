@@ -1,4 +1,5 @@
 var spawn = require('child_process').spawn,
+    EventEmitter = require('events').EventEmitter,
     ResourceCache = require('./resourcecache');
 
 var commentRegex = /^#.*$\n/mg,
@@ -62,7 +63,8 @@ var eyePrototype = Eye.prototype = {
       options.pass = true;
     
     // set EYE commandline arguments according to options
-    var args = [],
+    var eye,
+        args = [],
         resources = [],
         resourcesPending = 0;
     noArgOptions.forEach(function (name) {
@@ -115,16 +117,16 @@ var eyePrototype = Eye.prototype = {
     
     function startEye() {
       // start EYE
-      var eye = (thiz.spawn || spawn)('eye', args),
-          output = "",
-          error = "";
+      eye = (thiz.spawn || spawn)('eye', args);
     
       // capture stdout
+      var output = "";
       eye.stdout.on('data', function (data) {
         output += data;
       });
       
       // capture stderr
+      var error = "";
       eye.stderr.on('data', function (data) {
         error += data;
       });
@@ -133,6 +135,7 @@ var eyePrototype = Eye.prototype = {
       eye.once('exit', function (code) {
         eye.stdout.removeAllListeners('data');
         eye.stderr.removeAllListeners('data');
+        eye = null;
         
         if(!thiz.keepResources) {
           resources.forEach(function (resource) {
@@ -149,6 +152,21 @@ var eyePrototype = Eye.prototype = {
         }
       });
     }
+    
+    function stopEye() {
+      if(eye) {
+        eye.removeAllListeners('exit');
+        eye.stdout.removeAllListeners('data');
+        eye.stderr.removeAllListeners('data');
+        eye.kill();
+        eye = null;
+      }
+    }
+    
+    // return status object
+    var status = new EventEmitter();
+    status.cancel = stopEye;
+    return status;
   },
   
   clean: function(n3) {

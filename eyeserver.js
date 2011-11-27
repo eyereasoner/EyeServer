@@ -87,7 +87,7 @@ EyeServer.prototype = {
       eyeParams.originalUrl = req.originalUrl;
 
     // execute the reasoner and return result or error
-    this.settings.eye.execute(eyeParams, function (error, result) {
+    var eyeStatus = this.settings.eye.execute(eyeParams, function (error, result) {
       if(!jsonpCallback) {
         self.setDefaultHeaders(req, res);
         if(!error) {
@@ -107,6 +107,9 @@ EyeServer.prototype = {
           res.send('alert("Illegal callback name.")', 400);
       }
     });
+    
+    // cancel reasoning process if request is closed prematurely
+    req.once('close', proxy(eyeStatus, eyeStatus.cancel));
   },
   
   handleEyeOptionsRequest: function(req, res, next) {

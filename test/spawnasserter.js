@@ -10,6 +10,11 @@ function SpawnAsserter() {
     spawnAsserter.stdout = new events.EventEmitter();
     spawnAsserter.stderr = new events.EventEmitter();
     
+    spawnAsserter.kill = function () {
+      spawnAsserter.killed = true;
+      spawnAsserter.emit('killed');
+    };
+    
     process.nextTick(function () {
       spawnAsserter.emit('ready');
     });
