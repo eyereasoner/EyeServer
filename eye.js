@@ -116,6 +116,10 @@ var eyePrototype = Eye.prototype = {
       startEye();
     
     function startEye() {
+      // make sure not to start EYE twice
+      if(eye)
+        return;
+      
       // start EYE
       eye = (thiz.spawn || spawn)('eye', args);
     
