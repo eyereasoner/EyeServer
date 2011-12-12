@@ -72,55 +72,48 @@ vows.describe('Eye').addBatch({
     'when executed with one data URI':
       shouldExecuteEyeWith({ data: 'http://ex.org/1' },
                            "with one data URI",
-                           ['--nope', '--pass', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri']),
     
     'when executed with multiple data URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://ex.org/2'] },
                            "with multiple data URIs",
-                           ['--nope', '--pass', 'http://ex.org/1', 'http://ex.org/2']),
+                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri',
+                                                'http://ex.org/2', '--wcache', 'http://ex.org/2', 'http://ex.org/2_cachedUri']),
     
     'when executed with localhost URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://localhost/2', 'https://localhost/3'] },
                            "without the localhost URIs",
-                           ['--nope', '--pass', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri']),
     
     'when executed with 127.0.0.1 URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://127.0.0.1/2', 'https://127.0.0.1/3'] },
                            "without the 127.0.0.1 URIs",
-                           ['--nope', '--pass', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri']),
     
     'when executed with ::1 URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://::1/2', 'https://::1/3'] },
                            "without the ::1 URIs",
-                           ['--nope', '--pass', 'http://ex.org/1']),
+                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri']),
     
     'when executed with file URIs':
        shouldExecuteEyeWith({ data: ['http://ex.org/1', 'file://example/'] },
                             "without the file URIs",
-                            ['--nope', '--pass', 'http://ex.org/1']),
-    
-    'when executed with an inexisting URI':
-      shouldExecuteEyeWith({ data: ['http://ex.org/doesnotexist'] },
-                           "with the URI",
-                           ['--nope', '--pass', 'http://ex.org/doesnotexist'],
-                           null, null,
-                           "** ERROR ** Message",
-                           "Message"),
+                            ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri']),
     
     'when executed with a query URI':
       shouldExecuteEyeWith({ query: 'http://ex.org/1' },
                            "with the query URI and without 'pass'",
-                           ['--nope', '--query', 'http://ex.org/1' ]),
+                           ['--nope', '--query', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri' ]),
     
     'when executed with multiple query URIs':
       shouldExecuteEyeWith({ query: ['http://ex.org/1', 'http://ex.org/2'] },
                            "with the first query URI and without 'pass'",
-                           ['--nope', '--query', 'http://ex.org/1' ]),
+                           ['--nope', '--query', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri' ]),
     
     'when executed with literal data':
       shouldExecuteEyeWith({ data: ':a :b :c.' },
                            'with a temporary file',
-                           ['--nope', '--pass', 'tmp/1', '--wcache', 'tmp/1', ':a :b :c._cached']),
+                           ['--nope', '--pass', 'tmp/1', '--wcache', 'tmp/1', ':a :b :c._cachedStr']),
     
     'when executed with data that results in unused prefixes':
       shouldExecuteEyeWith({},
@@ -143,6 +136,14 @@ vows.describe('Eye').addBatch({
                            '@prefix ex-1: <http://ex.org/1/>.\n'
                             + '@prefix ex-2: <http://ex.org/2/>.\n\n'
                             + 'ex-1:a ex-2:b ex-1:c.'),
+                            'when execution results in an error':
+      shouldExecuteEyeWith({},
+                           "should return the error",
+                           ['--nope', '--pass'],
+                           null, null,
+                           "** ERROR ** Message",
+                           "Message"),
+    
     'when executed, returns an object that': (function () {
       var spawner = new SpawnAsserter(),
           emitter;
@@ -173,8 +174,8 @@ function executeEyeWith(options, errorText, outputText) {
     var spawner = new SpawnAsserter(),
         cached = {},
         resourceCache = {
-          cacheFromString: function(s, callback) { cached[s + '_cached'] = true; callback(null, s + '_cached'); },
-          cacheFromUrl:    function(u, callback) { cached[u + '_cached'] = true; callback(null, u + '_cached'); },
+          cacheFromString: function(s, callback) { cached[s + '_cachedStr'] = true; callback(null, s + '_cachedStr'); },
+          cacheFromUrl:    function(u, callback) { cached[u + '_cachedUri'] = true; callback(null, u + '_cachedUri'); },
           release: function(r) { cached[r].should.be.true; cached[r] = false; }
         },
         eyeInstance = new eye({ spawn: spawner.spawn, resourceCache: resourceCache }),

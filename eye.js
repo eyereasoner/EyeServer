@@ -89,43 +89,50 @@ var eyePrototype = Eye.prototype = {
       if(dataItem.match(/^\w+:/)) {
         // is it HTTP(S), but not on a reserved domain?
         if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/)) {
-          // pass possible data modifier (such as '--query')
-          if(typeof(modifier) === 'string')
-            args.push(modifier);
-          // pass data item itself
-          args.push(dataItem);
+          // cache the resource and add it
+          thiz.resourceCache.cacheFromUrl(dataItem, addResourceCallback(dataItem, modifier));
         }
       }
       // the data resource is assumed to be N3 now,
       // so a new data resource has to be created from the N3 string
       else {
-        // since the new resource (file) will be created asynchronously,
-        // we need to keep track of the number of pending resources.
-        resourcesPending++;
-        // create file from the N3 string
-        thiz.resourceCache.cacheFromString(dataItem, function (err, fileName) {
-          if(err)
-            return callback(err, null);
-          
-          // pass possible data modifier (such as '--query')
-          if(typeof(modifier) === 'string')
-            args.push(modifier);
-          // a new local URI will represent the cached data resource
-          var localUri = "tmp/" + (++localResources);
-          args.push(localUri);
-          args.push("--wcache");
-          args.push(localUri);
-          args.push(fileName);
-          
-          // keep track of gathered resources
-          resources.push(fileName);
-          resourcesPending--;
-          if(!resourcesPending)
-            startEye();
-        });
+        // cache the N3 string in a file and add it
+        thiz.resourceCache.cacheFromString(dataItem, addResourceCallback("tmp/" + (++localResources), modifier));
       }
     }
     
+    // returns a callback that will pass the resource to EYE
+    function addResourceCallback(uri, modifier) {
+      // since the resource cache file will be created asynchronously,
+      // we need to keep track of the number of pending resources.
+      resourcesPending++;
+      
+      // return a callback for resourceCache
+      return function (err, cacheFile) {
+        if(err)
+          return callback(err, null);
+        
+        // pass possible data modifier (such as '--query')
+        if(typeof(modifier) === 'string')
+          args.push(modifier);
+        // pass the URI of the cached item
+        args.push(uri);
+        // tell in what file the resource with the URI has been cached
+        args.push("--wcache");
+        args.push(uri);
+        args.push(cacheFile);
+      
+        // keep track of gathered resources
+        resources.push(cacheFile);
+        resourcesPending--;
+        
+        // start EYE if no more resources are pending
+        if(!resourcesPending)
+          startEye();
+      }
+    }
+    
+    // start EYE if no more resources are pending
     if(!resourcesPending)
       startEye();
     
