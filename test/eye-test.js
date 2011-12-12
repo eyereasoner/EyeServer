@@ -77,8 +77,9 @@ vows.describe('Eye').addBatch({
     'when executed with multiple data URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://ex.org/2'] },
                            "with multiple data URIs",
-                           ['--nope', '--pass', 'http://ex.org/1', '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri',
-                                                'http://ex.org/2', '--wcache', 'http://ex.org/2', 'http://ex.org/2_cachedUri']),
+                           ['--nope', '--pass', 'http://ex.org/1', 'http://ex.org/2',
+                                                '--wcache', 'http://ex.org/1', 'http://ex.org/1_cachedUri',
+                                                '--wcache', 'http://ex.org/2', 'http://ex.org/2_cachedUri']),
     
     'when executed with localhost URIs':
       shouldExecuteEyeWith({ data: ['http://ex.org/1', 'http://localhost/2', 'https://localhost/3'] },
@@ -175,13 +176,15 @@ function executeEyeWith(options, errorText, outputText) {
         cached = {},
         resourceCache = {
           cacheFromString: function(s, callback) {
-            cached[s + '_cachedStr'] = true;
-            callback(null, s + '_cachedStr');
+            var fileName = s + '_cachedStr';
+            cached[fileName] = true;
+            process.nextTick(function () { callback(null, fileName); });
           },
           cacheFromUrl: function(u, contentType, callback) {
-            contentType.should.eql('text/n3,text/turtle,*/*;q=.1')
-            cached[u + '_cachedUri'] = true;
-            callback(null, u + '_cachedUri');
+            var fileName = u + '_cachedUri';
+            cached[fileName] = true;
+            process.nextTick(function () { callback(null, fileName); });
+            contentType.should.eql('text/n3,text/turtle,*/*;q=.1');
           },
           release: function(r) { cached[r].should.be.true; cached[r] = false; }
         },

@@ -103,20 +103,20 @@ var eyePrototype = Eye.prototype = {
     
     // returns a callback that will pass the resource to EYE
     function addResourceCallback(uri, modifier) {
+      // pass possible data modifier (such as '--query')
+      if(typeof(modifier) === 'string')
+        args.push(modifier);
+      // pass the URI of the cached item
+      args.push(uri);
+      
       // since the resource cache file will be created asynchronously,
       // we need to keep track of the number of pending resources.
       resourcesPending++;
-      
       // return a callback for resourceCache
       return function (err, cacheFile) {
         if(err)
           return callback(err, null);
         
-        // pass possible data modifier (such as '--query')
-        if(typeof(modifier) === 'string')
-          args.push(modifier);
-        // pass the URI of the cached item
-        args.push(uri);
         // tell in what file the resource with the URI has been cached
         args.push("--wcache");
         args.push(uri);
