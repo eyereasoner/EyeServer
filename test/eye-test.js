@@ -118,9 +118,9 @@ vows.describe('Eye').addBatch({
                            ['--nope', '--query', 'http://ex.org/1' ]),
     
     'when executed with literal data':
-      shouldExecuteEyeWith({ data: '<http://ex/#a> <http://ex/#a> <http://ex/#c>.' },
+      shouldExecuteEyeWith({ data: ':a :b :c.' },
                            'with a temporary file',
-                           shouldEqualPassWithFileData('<http://ex/#a> <http://ex/#a> <http://ex/#c>.')),
+                           ['--nope', '--pass', 'tmp/1', '--wcache', 'tmp/1', ':a :b :c._cached']),
     
     'when executed with data that results in unused prefixes':
       shouldExecuteEyeWith({},
@@ -171,7 +171,13 @@ vows.describe('Eye').addBatch({
 function executeEyeWith(options, errorText, outputText) {
   return function () {
     var spawner = new SpawnAsserter(),
-        eyeInstance = new eye({ spawn: spawner.spawn, keepResources: true }),
+        cached = {},
+        resourceCache = {
+          cacheFromString: function(s, callback) { cached[s + '_cached'] = true; callback(null, s + '_cached'); },
+          cacheFromUrl:    function(u, callback) { cached[u + '_cached'] = true; callback(null, u + '_cached'); },
+          release: function(r) { cached[r].should.be.true; cached[r] = false; }
+        },
+        eyeInstance = new eye({ spawn: spawner.spawn, resourceCache: resourceCache }),
         callback = this.callback;
     
     spawner.once('ready', function() {
@@ -181,6 +187,8 @@ function executeEyeWith(options, errorText, outputText) {
       spawner.listeners('exit').should.be.empty;
       spawner.stdout.listeners('data').should.be.empty;
       spawner.stderr.listeners('data').should.be.empty;
+      for(var file in cached)
+        cached[file].should.be.false;
     });
     
     eyeInstance.execute(options, function (err, result) {
@@ -215,13 +223,3 @@ function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, exp
   
   return context;
 }
-
-function shouldEqualPassWithFileData(data) {
-  return function(args) {
-    args.length.should.eql(6);
-    var tmpFile = args[5];
-    tmpFile.should.match(/^\/tmp\/\w/);
-    fs.readFileSync(tmpFile, 'utf8').should.eql(data);
-    args.should.eql(['--nope', '--pass', 'tmp/1', '--wcache', 'tmp/1', tmpFile]);
-  }
- }

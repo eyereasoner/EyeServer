@@ -24,8 +24,7 @@ function Eye (options) {
   // create and return new Eye object
   var eye = new F();
   eye.spawn = options.spawn;
-  eye.keepResources = options.keepResources;
-  eye.resourceCache = new ResourceCache();
+  eye.resourceCache = options.resourceCache || new ResourceCache();
   return eye;
 }
 
@@ -156,11 +155,9 @@ var eyePrototype = Eye.prototype = {
         eye.stderr.removeAllListeners('data');
         eye = null;
         
-        if(!thiz.keepResources) {
-          resources.forEach(function (resource) {
-            thiz.resourceCache.release(resource);
-          });
-        }
+        resources.forEach(function (resource) {
+          thiz.resourceCache.release(resource);
+        });
       
         var errorMatch = error.match(errorRegex);
         if (!errorMatch) {
