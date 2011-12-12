@@ -85,8 +85,13 @@ ResourceCache.prototype = {
     });
   },
   
-  cacheFromUrl: function (resourceUrl, callback) {
+  cacheFromUrl: function (resourceUrl, contentType, callback) {
     var thiz = this;
+    // the contentType argument is optional
+    if(!callback) {
+      callback = contentType;
+      contentType = null;
+    }
     
     this.getDirectoryName (function(err, dirName) {
       if(err)
@@ -97,7 +102,8 @@ ResourceCache.prototype = {
       var requestOptions = {
         host: urlParts.hostname,
         port: urlParts.port || 80,
-        path: (urlParts.pathname || '') + (urlParts.search || '')
+        path: (urlParts.pathname || '') + (urlParts.search || ''),
+        headers: contentType ? { accept: contentType } : {},
       }
       
       // perform the HTTP GET request

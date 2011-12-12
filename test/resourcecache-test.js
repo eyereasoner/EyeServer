@@ -27,7 +27,10 @@ vows.describe('ResourceCache').addBatch({
   'A ResourceCache': {
     topic: function () {
       dummyServer = express.createServer();
-      dummyServer.get(/^\/$/, function (req, res, next) { res.send('contents', 200); });
+      dummyServer.get(/^\/$/, function (req, res, next) {
+        var contentType = req.headers.accept || '';
+        res.send('contents' + contentType, 200);
+      });
       dummyServer.listen(14207);
       return new ResourceCache()
     },
@@ -126,6 +129,17 @@ vows.describe('ResourceCache').addBatch({
         err.should.eql('GET request to http://127.0.0.1:14207/notexists failed with status 404');
         should.not.exist(result);
       }
-    }
+    },
+    
+    'when caching an existing resource through HTTP with a content type': {
+      topic: function(resourceCache) {
+        return resourceCache.cacheFromUrl('http://127.0.0.1:14207/', 'text/plain', this.callback);
+      },
+      
+      'should send the Content-Type header': function(err, result) {
+        should.not.exist(err);
+        fs.readFileSync(result, 'utf8').should.eql('contentstext/plain');
+      }
+    },
   }
 }).export(module);

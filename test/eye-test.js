@@ -174,8 +174,15 @@ function executeEyeWith(options, errorText, outputText) {
     var spawner = new SpawnAsserter(),
         cached = {},
         resourceCache = {
-          cacheFromString: function(s, callback) { cached[s + '_cachedStr'] = true; callback(null, s + '_cachedStr'); },
-          cacheFromUrl:    function(u, callback) { cached[u + '_cachedUri'] = true; callback(null, u + '_cachedUri'); },
+          cacheFromString: function(s, callback) {
+            cached[s + '_cachedStr'] = true;
+            callback(null, s + '_cachedStr');
+          },
+          cacheFromUrl: function(u, contentType, callback) {
+            contentType.should.eql('text/n3,text/turtle,*/*;q=.1')
+            cached[u + '_cachedUri'] = true;
+            callback(null, u + '_cachedUri');
+          },
           release: function(r) { cached[r].should.be.true; cached[r] = false; }
         },
         eyeInstance = new eye({ spawn: spawner.spawn, resourceCache: resourceCache }),

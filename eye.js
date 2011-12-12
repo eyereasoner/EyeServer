@@ -90,7 +90,7 @@ var eyePrototype = Eye.prototype = {
         // is it HTTP(S), but not on a reserved domain?
         if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/)) {
           // cache the resource and add it
-          thiz.resourceCache.cacheFromUrl(dataItem, addResourceCallback(dataItem, modifier));
+          thiz.resourceCache.cacheFromUrl(dataItem, 'text/n3,text/turtle,*/*;q=.1', addResourceCallback(dataItem, modifier));
         }
       }
       // the data resource is assumed to be N3 now,
