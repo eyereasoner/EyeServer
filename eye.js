@@ -66,7 +66,8 @@ var eyePrototype = Eye.prototype = {
     var eye,
         args = [],
         resources = [],
-        resourcesPending = 0;
+        resourcesPending = 0,
+        localResources = 0;
     noArgOptions.forEach(function (name) {
       if (options[name]) {
         args.push('--' + name.replace(/([A-Z])/g, '-$1').toLowerCase());
@@ -89,21 +90,35 @@ var eyePrototype = Eye.prototype = {
       if(dataItem.match(/^\w+:/)) {
         // is it HTTP(S), but not on a reserved domain?
         if(dataItem.match(/^https?:\/\/(?!localhost|127\.0\.0\.1|[0:]*:1)/)) {
+          // pass possible data modifier (such as '--query')
           if(typeof(modifier) === 'string')
             args.push(modifier);
+          // pass data item itself
           args.push(dataItem);
         }
       }
+      // the data resource is assumed to be N3 now,
+      // so a new data resource has to be created from the N3 string
       else {
+        // since the new resource (file) will be created asynchronously,
+        // we need to keep track of the number of pending resources.
         resourcesPending++;
+        // create file from the N3 string
         thiz.resourceCache.cacheFromString(dataItem, function (err, fileName) {
           if(err)
             return callback(err, null);
-
+          
+          // pass possible data modifier (such as '--query')
           if(typeof(modifier) === 'string')
             args.push(modifier);
+          // a new local URI will represent the cached data resource
+          var localUri = "tmp/" + (++localResources);
+          args.push(localUri);
+          args.push("--wcache");
+          args.push(localUri);
           args.push(fileName);
           
+          // keep track of gathered resources
           resources.push(fileName);
           resourcesPending--;
           if(!resourcesPending)
@@ -176,12 +191,6 @@ var eyePrototype = Eye.prototype = {
   clean: function(n3) {
     // remove comments
     n3 = n3.replace(commentRegex, '');
-    
-    // change local filename identifiers into temporary identifiers
-    var localIds = {}, localIdCount = 0;
-    n3 = n3.replace(localIdentifierRegex, function (match, path, name) {
-      return (localIds[path] || (localIds[path] = '<tmp/' + (++localIdCount) + '#')) + name;
-    });
     
     // remove prefix declarations from the document, storing them in an object
     var prefixes = {};

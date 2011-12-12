@@ -121,13 +121,6 @@ vows.describe('Eye').addBatch({
       shouldExecuteEyeWith({ data: '<http://ex/#a> <http://ex/#a> <http://ex/#c>.' },
                            'with a temporary file',
                            shouldEqualPassWithFileData('<http://ex/#a> <http://ex/#a> <http://ex/#c>.')),
-
-    'when executed with literal data with local entities':
-      shouldExecuteEyeWith({ data: ':a :b :c.' },
-                           'with a temporary file but hide its name in the output',
-                           shouldEqualPassWithFileData(':a :b :c.'),
-                           '</tmp/node_1_0/0.tmp#a> </tmp/node_2_1/0.tmp#b> </tmp/node_1_0/0.tmp#c>.',
-                           '<tmp/1#a> <tmp/2#b> <tmp/1#c>.'),
     
     'when executed with data that results in unused prefixes':
       shouldExecuteEyeWith({},
@@ -225,9 +218,10 @@ function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, exp
 
 function shouldEqualPassWithFileData(data) {
   return function(args) {
-    args.length.should.eql(3);
-    args[2].should.match(/^\/tmp\/\w/);
-    fs.readFileSync(args[2], 'utf8').should.eql(data);
-    args.should.eql(['--nope', '--pass', args[2]]);
+    args.length.should.eql(6);
+    var tmpFile = args[5];
+    tmpFile.should.match(/^\/tmp\/\w/);
+    fs.readFileSync(tmpFile, 'utf8').should.eql(data);
+    args.should.eql(['--nope', '--pass', 'tmp/1', '--wcache', 'tmp/1', tmpFile]);
   }
  }
