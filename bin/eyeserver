@@ -3,6 +3,17 @@
 var EyeServer = require('../lib/eyeserver.js');
 
 var eyeServer = new EyeServer();
-var port = process.argv[2] ? parseInt(process.argv[2], 10) : 8000;
-eyeServer.listen(port);
-console.log('EYE server running on http://localhost:' + port);
+eyeServer.check(function (err) {
+  if(err) {
+    console.error('ERROR: Could not start EyeServer\n' +
+                  'Possibly the eye command could not be found, ' +
+                  'or /tmp has no write permission.\n\n' +
+                  'Error detail:\n', err);
+    process.exit(1);
+  }
+  else {
+    var port = process.argv[2] ? parseInt(process.argv[2], 10) : 8000;
+    eyeServer.listen(port);
+    console.log('EYE server running on http://localhost:' + port);
+  }
+});

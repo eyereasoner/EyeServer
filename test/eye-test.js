@@ -236,8 +236,9 @@ function executeEyeWith(options, errorText, outputText) {
 }
 
 function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, expectedOutput, error, errorMessage) {
+  var eyeSignature = "#Processed by Id: euler.yap\n";
   var context = {
-    topic: executeEyeWith(options, error, error ? null : (eyeOutput || "eyeOutput"))
+    topic: executeEyeWith(options, error, eyeSignature + (eyeOutput || "eyeOutput"))
   };
 
   context['should execute EYE ' + description] = function (err, result, spawner) {
