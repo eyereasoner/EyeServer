@@ -114,8 +114,11 @@ var eyePrototype = Eye.prototype = {
       resourcesPending++;
       // return a callback for resourceCache
       return function (err, cacheFile) {
-        if(err)
-          return callback(err, null);
+        if(err) {
+          callback && callback(err, null);
+          callback = null;
+          return;
+        }
         
         // tell in what file the resource with the URI has been cached
         args.push("--wcache");
@@ -171,8 +174,9 @@ var eyePrototype = Eye.prototype = {
           callback && callback(null, thiz.clean(output));
         }
         else {
-         callback(errorMatch[1], null);
+          callback && callback(errorMatch[1], null);
         }
+        callback = null;
       });
     }
     

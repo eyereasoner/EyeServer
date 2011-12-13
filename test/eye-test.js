@@ -167,6 +167,33 @@ vows.describe('Eye').addBatch({
         },
       };
     })(),
+    
+    'when executed with multiple failing resources': {
+      topic: function () {
+        var self = this,
+            remaining = 4,
+            eyeResult = '',
+            resourceCache = {
+              cacheFromString: function(s,    callback) { callback('ERR ' + s); cached(); },
+              cacheFromUrl   : function(s, t, callback) { callback('ERR ' + s); cached(); },
+            };
+        
+        function cached() {
+          if(!(--remaining))
+            self.callback(eyeResult);
+        }
+        
+        new eye({ resourceCache: resourceCache})
+          .execute({ data: ['a', 'b', 'http://a', 'http://b'] }, function (value) {
+            eyeResult += value;
+          });
+      },
+      
+      'only the first failing resource should fire the callback': function(err, value) {
+        err.should.eql('ERR a');
+        should.not.exist(value);
+      }
+    },
   }
 }).export(module);
 
