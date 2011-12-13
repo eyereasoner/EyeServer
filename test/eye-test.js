@@ -1,9 +1,9 @@
+var eye = require('../lib/eye.js');
 var vows = require('vows'),
     should = require('should'),
     fs = require('fs'),
     EventEmitter = require('events').EventEmitter;
     SpawnAsserter = require('./spawnasserter');
-var eye = require('../eye.js');
 
 vows.describe('Eye').addBatch({
   'The eye module': {

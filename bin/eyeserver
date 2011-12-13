@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var EyeServer = require('./eyeserver.js');
+var EyeServer = require('../lib/eyeserver.js');
 
 var eyeServer = new EyeServer();
 var port = process.argv[2] ? parseInt(process.argv[2], 10) : 8000;

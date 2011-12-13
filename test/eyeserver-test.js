@@ -1,8 +1,8 @@
+var eyeserver = require('../lib/eyeserver.js');
 var vows = require('vows'),
     should = require('should'),
     request = require('request'),
     EventEmitter = require('events').EventEmitter;
-var eyeserver = require('../eyeserver.js');
 
 vows.describe('EyeServer').addBatch({
   'The eyeserver module': {

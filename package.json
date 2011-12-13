@@ -1,0 +1,31 @@
+{
+  "name": "eyeserver",
+  "version": "0.1.0",
+  "description": "EYE reasoner server.",
+  "author": "Ruben Verborgh <ruben.verborgh@gmail.com>",
+  "keywords": ["eye", "reasoner", "n3"],
+  "main": "./package.js",
+  "bin": "./bin/eyeserver",
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "dependencies": {
+    "express": "~2.5.2",
+    "resourcecache": "~0.1.0"
+  },
+  "devDependencies": {
+    "vows": "~0.6.0",
+    "should": "~0.3.2",
+    "request": "~2.2.9"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/RubenVerborgh/EyeServer.git"
+  },
+  "bugs": {
+    "url": "http://github.com/RubenVerborgh/EyeServer/issues"
+  }
+}
