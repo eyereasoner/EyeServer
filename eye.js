@@ -1,6 +1,6 @@
 var spawn = require('child_process').spawn,
     EventEmitter = require('events').EventEmitter,
-    ResourceCache = require('./resourcecache');
+    ResourceCache = require('resourcecache');
 
 var commentRegex = /^#.*$\n/mg,
     localIdentifierRegex = /<\/tmp\/([^#]+)#([^>]+>)/g,
