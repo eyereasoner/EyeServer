@@ -137,7 +137,7 @@ vows.describe('Eye').addBatch({
                            '@prefix ex-1: <http://ex.org/1/>.\n'
                             + '@prefix ex-2: <http://ex.org/2/>.\n\n'
                             + 'ex-1:a ex-2:b ex-1:c.'),
-                            'when execution results in an error':
+    'when execution results in an error':
       shouldExecuteEyeWith({},
                            "should return the error",
                            ['--nope', '--pass'],
@@ -198,6 +198,8 @@ vows.describe('Eye').addBatch({
 }).export(module);
 
 function executeEyeWith(options, errorText, outputText) {
+  var eyeSignature = "Id: euler.yap\n";
+  
   return function () {
     var spawner = new SpawnAsserter(),
         cached = {},
@@ -219,8 +221,8 @@ function executeEyeWith(options, errorText, outputText) {
         callback = this.callback;
     
     spawner.once('ready', function() {
-      errorText && spawner.stderr.emit('data', errorText);
-      outputText && spawner.stdout.emit('data', outputText);
+      spawner.stderr.emit('data', eyeSignature + errorText);
+      spawner.stdout.emit('data', outputText);
       spawner.emit('exit');
       spawner.listeners('exit').should.be.empty;
       spawner.stdout.listeners('data').should.be.empty;
@@ -236,9 +238,8 @@ function executeEyeWith(options, errorText, outputText) {
 }
 
 function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, expectedOutput, error, errorMessage) {
-  var eyeSignature = "#Processed by Id: euler.yap\n";
   var context = {
-    topic: executeEyeWith(options, error, eyeSignature + (eyeOutput || "eyeOutput"))
+    topic: executeEyeWith(options, error, eyeOutput || "eyeOutput")
   };
 
   context['should execute EYE ' + description] = function (err, result, spawner) {
