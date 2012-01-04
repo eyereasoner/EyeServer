@@ -20,7 +20,7 @@ function SpawnAsserter() {
     });
     
     return spawnAsserter;
-  }
+  };
   
   return spawnAsserter;
 }

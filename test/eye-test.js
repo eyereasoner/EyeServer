@@ -2,12 +2,12 @@ var eye = require('../lib/eye.js');
 var vows = require('vows'),
     should = require('should'),
     fs = require('fs'),
-    EventEmitter = require('events').EventEmitter;
+    EventEmitter = require('events').EventEmitter,
     SpawnAsserter = require('./spawnasserter');
 
 vows.describe('Eye').addBatch({
   'The eye module': {
-    topic: function() { return eye; },
+    topic: function () { return eye; },
     
     'should be a function': function (eye) {
       eye.should.be.a('function');
@@ -51,7 +51,7 @@ vows.describe('Eye').addBatch({
                            "without 'nope'",
                            ['--pass']),
     
-    'when executed with nope to false':
+    'when executed with pass to false':
       shouldExecuteEyeWith({ pass: false },
                            "without 'pass'",
                            ['--nope']),
@@ -120,23 +120,23 @@ vows.describe('Eye').addBatch({
       shouldExecuteEyeWith({},
                            'and remove unused prefixes',
                            [ '--nope', '--pass' ],
-                           '@prefix ex-1: <http://ex.org/1#>.\n'
-                           + '@prefix ex-2: <http://ex.org/2#>.\n'
-                           + '@prefix ex-3: <http://ex.org/3/>.\n'
-                           + 'ex-2:a ex-2:b ex-2:c.',
-                           '@prefix ex-2: <http://ex.org/2#>.\n\n'
-                           + 'ex-2:a ex-2:b ex-2:c.'),
+                           '@prefix ex-1: <http://ex.org/1#>.\n' +
+                           '@prefix ex-2: <http://ex.org/2#>.\n' +
+                           '@prefix ex-3: <http://ex.org/3/>.\n' +
+                           'ex-2:a ex-2:b ex-2:c.',
+                           '@prefix ex-2: <http://ex.org/2#>.\n\n' +
+                           'ex-2:a ex-2:b ex-2:c.'),
     
     'when executed with data that results in prefixes for unhashed namespaces':
       shouldExecuteEyeWith({},
                            'and use the prefixes for unhashed namespaces as well',
                            [ '--nope', '--pass' ],
-                           '@prefix ex-1: <http://ex.org/1/>.\n'
-                           + '@prefix ex-2: <http://ex.org/2/>.\n'
-                           + '<http://ex.org/1/a> <http://ex.org/2/b> <http://ex.org/1/c>.',
-                           '@prefix ex-1: <http://ex.org/1/>.\n'
-                            + '@prefix ex-2: <http://ex.org/2/>.\n\n'
-                            + 'ex-1:a ex-2:b ex-1:c.'),
+                           '@prefix ex-1: <http://ex.org/1/>.\n' +
+                           '@prefix ex-2: <http://ex.org/2/>.\n' +
+                           '<http://ex.org/1/a> <http://ex.org/2/b> <http://ex.org/1/c>.',
+                           '@prefix ex-1: <http://ex.org/1/>.\n' +
+                            '@prefix ex-2: <http://ex.org/2/>.\n\n' +
+                            'ex-1:a ex-2:b ex-1:c.'),
     'when execution results in an error':
       shouldExecuteEyeWith({},
                            "should return the error",
@@ -149,7 +149,7 @@ vows.describe('Eye').addBatch({
       var spawner = new SpawnAsserter(),
           emitter;
       return {
-        topic: function() {
+        topic: function () {
           emitter = new eye({ spawn: spawner.spawn }).execute();
           return { result: emitter, spawner: spawner };
         },
@@ -174,12 +174,12 @@ vows.describe('Eye').addBatch({
             remaining = 4,
             eyeResult = '',
             resourceCache = {
-              cacheFromString: function(s,    callback) { callback('ERR ' + s); cached(); },
-              cacheFromUrl   : function(s, t, callback) { callback('ERR ' + s); cached(); },
+              cacheFromString: function (s,    callback) { callback('ERR ' + s); cached(); },
+              cacheFromUrl   : function (s, t, callback) { callback('ERR ' + s); cached(); },
             };
         
         function cached() {
-          if(!(--remaining))
+          if (!(--remaining))
             self.callback(eyeResult);
         }
         
@@ -189,7 +189,7 @@ vows.describe('Eye').addBatch({
           });
       },
       
-      'only the first failing resource should fire the callback': function(err, value) {
+      'only the first failing resource should fire the callback': function (err, value) {
         err.should.eql('ERR a');
         should.not.exist(value);
       }
@@ -204,30 +204,30 @@ function executeEyeWith(options, errorText, outputText) {
     var spawner = new SpawnAsserter(),
         cached = {},
         resourceCache = {
-          cacheFromString: function(s, callback) {
+          cacheFromString: function (s, callback) {
             var fileName = s + '_cachedStr';
             cached[fileName] = true;
             process.nextTick(function () { callback(null, fileName); });
           },
-          cacheFromUrl: function(u, contentType, callback) {
+          cacheFromUrl: function (u, contentType, callback) {
             var fileName = u + '_cachedUri';
             cached[fileName] = true;
             process.nextTick(function () { callback(null, fileName); });
             contentType.should.eql('text/n3,text/turtle,*/*;q=.1');
           },
-          release: function(r) { cached[r].should.be.true; cached[r] = false; }
+          release: function (r) { cached[r].should.be.true; cached[r] = false; }
         },
         eyeInstance = new eye({ spawn: spawner.spawn, resourceCache: resourceCache }),
         callback = this.callback;
     
-    spawner.once('ready', function() {
+    spawner.once('ready', function () {
       spawner.stderr.emit('data', eyeSignature + errorText);
       spawner.stdout.emit('data', outputText);
       spawner.emit('exit');
       spawner.listeners('exit').should.be.empty;
       spawner.stdout.listeners('data').should.be.empty;
       spawner.stderr.listeners('data').should.be.empty;
-      for(var file in cached)
+      for (var file in cached)
         cached[file].should.be.false;
     });
     
@@ -244,13 +244,13 @@ function shouldExecuteEyeWith(options, description, expectedArgs, eyeOutput, exp
 
   context['should execute EYE ' + description] = function (err, result, spawner) {
     spawner.command.should.eql('eye');
-    if(typeof(expectedArgs) !== 'function')
+    if (typeof(expectedArgs) !== 'function')
       spawner.args.should.eql(expectedArgs);
     else
       expectedArgs(spawner.args);
-  }
+  };
   
-  if(!error)
+  if (!error)
     context['should return the EYE output'] = function (err, result) {
       should.not.exist(err);
       result.should.equal(expectedOutput || "eyeOutput");

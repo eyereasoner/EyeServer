@@ -6,7 +6,7 @@ var vows = require('vows'),
 
 vows.describe('EyeServer').addBatch({
   'The eyeserver module': {
-    topic: function() { return eyeserver; },
+    topic: function () { return eyeserver; },
     
     'should be a function': function (eyeserver) {
       eyeserver.should.be.a('function');
@@ -127,7 +127,7 @@ vows.describe('EyeServer').addBatch({
         'should cancel Eye': function () {
           should.exist(canceled);
         }
-      }
+      };
     })()
   }
 }).export(module);
@@ -138,7 +138,7 @@ var eyeDummy = {
     delete options.originalUrl;
     this.options[path] = options;
     
-    if(this.shouldSucceed[path])
+    if (this.shouldSucceed[path])
       callback(null, 'out"put');
     else
       callback('err"or', null);
@@ -147,10 +147,10 @@ var eyeDummy = {
   },
   options: {},
   shouldSucceed: {}
-}
+};
 
 function respondsWith(status, contentType, description, executeArguments, method, output) {
-  if(!method) {
+  if (!method) {
     return {
       'using GET' : respondsWith(status, contentType, description, executeArguments, "GET"),
       'using POST': respondsWith(status, contentType, description, executeArguments, "POST")
@@ -171,31 +171,31 @@ function respondsWith(status, contentType, description, executeArguments, method
     }
   };
   
-  context['should respond with status ' + status] = function(error, response, body) {
+  context['should respond with status ' + status] = function (error, response, body) {
     response.statusCode.should.eql(status);
-  }
+  };
   
-  context['should respond with Content-Type ' + contentType] = function(error, response, body) {
-    response.headers.should.have.property('content-type', contentType)
-  }
+  context['should respond with Content-Type ' + contentType] = function (error, response, body) {
+    response.headers.should.have.property('content-type', contentType);
+  };
   
-  if(contentType !== 'application/javascript')
-    context['should respond with Access-Control-Allow-Origin *'] = function(error, response, body) {
+  if (contentType !== 'application/javascript')
+    context['should respond with Access-Control-Allow-Origin *'] = function (error, response, body) {
       response.headers.should.have.property('access-control-allow-origin', '*');
-    }
+    };
   
-  if(shouldSucceed)
-    context['should return the Eye output'] = function(error, response, body) {
+  if (shouldSucceed)
+    context['should return the Eye output'] = function (error, response, body) {
       body.should.eql(output || 'out"put\n');
-    }
+    };
   else
-    context['should return the Eye error'] = function(error, response, body) {
+    context['should return the Eye error'] = function (error, response, body) {
       body.should.eql(output || 'err"or\n');
-    }
+    };
   
   context['should execute Eye ' + description] = function (error, response, body) {
     eyeDummy.options[path].should.eql(executeArguments);
-  }
+  };
   
   return context;
 }
