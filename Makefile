@@ -1,4 +1,7 @@
 test:
 	@./node_modules/.bin/vows
 
-.PHONY: test
+jshint:
+	@jshint lib bin
+
+.PHONY: test jshint
