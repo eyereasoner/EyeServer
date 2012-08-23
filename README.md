@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/RubenVerborgh/EyeServer.png)](http://travis-ci.org/RubenVerborgh/EyeServer)
 # EyeServer is a server for the EYE reasoner.
 
 [**Reasoning**](http://n3.restdesc.org/) is the powerful mechanism to draw conclusions from facts.  
