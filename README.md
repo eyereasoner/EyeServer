@@ -1,6 +1,6 @@
 # EyeServer is a server for the EYE reasoner.
 
-[**Reasoning**](http://n3.restdesc.org/) is the powerful mechanism to draw conclusions from facts.  
+[**Reasoning**](http://n3.restdesc.org/) is the powerful mechanism to draw conclusions from facts.
 The Semantic Web contains vast amounts of data,
 which makes it an interesting source to use with one of several available reasoners.
 
@@ -34,7 +34,7 @@ $ eyeserver 8000
 
 ``` bash
 $ curl "http://localhost:8000/?data=http://eulersharp.sourceforge.net/2003/03swap/socrates.n3&query=http://eulersharp.sourceforge.net/2003/03swap/socratesF.n3"
-``` 
+```
 
 ## Learn more.
 
