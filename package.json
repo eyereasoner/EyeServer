@@ -1,7 +1,7 @@
 {
   "name": "eyeserver",
-  "version": "0.1.0",
-  "description": "EYE reasoner server.",
+  "version": "0.1.1",
+  "description": "EYE reasoner server",
   "author": "Ruben Verborgh <ruben.verborgh@gmail.com>",
   "keywords": ["eye", "reasoner", "n3"],
   "main": "./package.js",
