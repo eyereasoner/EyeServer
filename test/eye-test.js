@@ -161,9 +161,10 @@ vows.describe('Eye').addBatch({
           should.not.exist(param.spawner.killed);
           param.result.cancel();
           should.exist(param.spawner.killed);
-          param.spawner.listeners('exit').should.be.empty;
           param.spawner.stdout.listeners('data').should.be.empty;
           param.spawner.stderr.listeners('data').should.be.empty;
+          param.spawner.stdout.listeners('end').should.be.empty;
+          param.spawner.stderr.listeners('end').should.be.empty;
         },
       };
     })(),
@@ -223,10 +224,12 @@ function executeEyeWith(options, errorText, outputText) {
     spawner.once('ready', function () {
       spawner.stderr.emit('data', eyeSignature + errorText);
       spawner.stdout.emit('data', outputText);
-      spawner.emit('exit');
-      spawner.listeners('exit').should.be.empty;
+      spawner.stdout.emit('end');
+      spawner.stderr.emit('end');
       spawner.stdout.listeners('data').should.be.empty;
       spawner.stderr.listeners('data').should.be.empty;
+      spawner.stdout.listeners('end').should.be.empty;
+      spawner.stderr.listeners('end').should.be.empty;
       for (var file in cached)
         cached[file].should.be.false;
     });
