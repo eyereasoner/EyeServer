@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Increase the number of available sockets
+require("http").globalAgent.maxSockets = 64;
+
 var EyeServer = require('../lib/eyeserver.js');
 
 var eyeServer = new EyeServer();
