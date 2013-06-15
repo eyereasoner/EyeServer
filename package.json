@@ -4,6 +4,7 @@
   "description": "EYE reasoner server",
   "author": "Ruben Verborgh <ruben.verborgh@gmail.com>",
   "keywords": ["eye", "reasoner", "n3"],
+  "license": "MIT",
   "main": "./package.js",
   "bin": "./bin/eyeserver",
   "engines": {
