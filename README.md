@@ -18,7 +18,11 @@ Follow the instructions below to set up your own reasoner server,
 or use our public reasoner server at `http://eye.restdesc.org/`.
 
 ### Installing
-EyeServer is an [npm](http://npmjs.org/) module for [node.js](http://nodejs.org/).
+EyeServer is an [npm](http://npmjs.org/) package for [node.js](http://nodejs.org/).
+
+First of all, you need to **install the EYE reasoner** ([Windows](http://eulersharp.sourceforge.net/README.Windows) – [OS X](http://eulersharp.sourceforge.net/README.MacOSX) – [Linux](http://eulersharp.sourceforge.net/README.Linux)).
+
+Then, **install the server package** as follows:
 
 ``` bash
 $ [sudo] npm -g install eyeserver
