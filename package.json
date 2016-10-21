@@ -1,6 +1,6 @@
 {
   "name": "eyeserver",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "EYE reasoner server",
   "author": "Ruben Verborgh <ruben.verborgh@gmail.com>",
   "keywords": [
