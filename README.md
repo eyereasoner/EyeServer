@@ -37,7 +37,7 @@ $ eyeserver 8000
 ### Using
 
 ``` bash
-$ curl "http://localhost:8000/?data=http://eulersharp.sourceforge.net/2003/03swap/socrates.n3&query=http://eulersharp.sourceforge.net/2003/03swap/socratesF.n3"
+$ curl "http://localhost:8000/?data=https://n3.restdesc.org/n3/friends.n3&data=https://n3.restdesc.org/n3/knows-rule.n3&query=https://n3.restdesc.org/n3/query-all.n3"
 ```
 
 ## Learn more.
